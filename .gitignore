@@ -41,8 +41,6 @@ yarn-error.*
 /android
 
 # Monorepo
-node_modules/
-dist/
 .superpowers/
 
 # Firebase

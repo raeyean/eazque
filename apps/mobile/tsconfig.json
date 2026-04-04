@@ -1,7 +1,6 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "jsx": "react-jsx",
     "paths": {
       "@eazque/shared": ["../../packages/shared/src"]
     }
