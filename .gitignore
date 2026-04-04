@@ -39,3 +39,11 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Monorepo
+node_modules/
+dist/
+.superpowers/
+
+# Firebase
+firebase/functions/lib/
