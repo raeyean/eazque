@@ -1,6 +1,63 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // === Helper functions ===
+
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    function isBusinessStaff(businessId) {
+      return isAuth() &&
+        exists(/databases/$(database)/documents/businesses/$(businessId)/staff/$(request.auth.uid));
+    }
+
+    function isBusinessOwner(businessId) {
+      return isAuth() &&
+        get(/databases/$(database)/documents/businesses/$(businessId)/staff/$(request.auth.uid)).data.role == "owner";
+    }
+
+    // === Business documents ===
+    match /businesses/{businessId} {
+      // Public read for customer-facing fields (name, logo, primaryColor, formFields, whatsappNumber)
+      // Note: whatsappApiKey is in this doc — a known limitation for MVP.
+      // Production should move sensitive fields to a private subcollection.
+      allow read: if true;
+      allow create: if isAuth();
+      allow update: if isBusinessOwner(businessId);
+      allow delete: if false;
+
+      // Staff subcollection
+      match /staff/{staffId} {
+        allow read: if isBusinessStaff(businessId);
+        allow create: if isBusinessOwner(businessId);
+        allow update: if isBusinessOwner(businessId);
+        allow delete: if isBusinessOwner(businessId);
+      }
+
+      // Queue subcollection
+      match /queues/{queueId} {
+        allow read: if true;
+        allow write: if isBusinessStaff(businessId);
+
+        // Entry subcollection
+        match /entries/{entryId} {
+          // Public read: allows customer web app to show queue list
+          // Note: exposes customerName/phone — production should restrict to
+          // staff + entry owner (via anonymous auth UID match).
+          allow read: if true;
+          // Only Cloud Functions can create entries (onCustomerJoin)
+          allow create: if false;
+          // Staff can update entries (status changes: serving, completed, skipped)
+          allow update: if isBusinessStaff(businessId);
+          // Only owner can delete entries
+          allow delete: if isBusinessOwner(businessId);
+        }
+      }
+    }
+
+    // Deny everything else
     match /{document=**} {
       allow read, write: if false;
     }
