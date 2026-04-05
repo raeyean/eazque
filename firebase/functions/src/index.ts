@@ -1,1 +1,1 @@
-// Cloud Function exports — added as each function is implemented
+export { onCustomerJoin } from "./on-customer-join";
