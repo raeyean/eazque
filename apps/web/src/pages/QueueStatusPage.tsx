@@ -1,4 +1,5 @@
 import { useParams, useLocation } from "react-router-dom";
+import { DEFAULT_ESTIMATED_TIME_PER_CUSTOMER } from "@eazque/shared";
 import { useBusinessData } from "../hooks/useBusinessData";
 import { useActiveQueue } from "../hooks/useActiveQueue";
 import { useQueueEntries } from "../hooks/useQueueEntries";
@@ -53,7 +54,7 @@ export default function QueueStatusPage() {
   const businessName = business?.name ?? navState.businessName ?? "";
   const primaryColor =
     business?.primaryColor ?? navState.primaryColor ?? "#B8926A";
-  const defaultEstimatedTime = 10;
+  const defaultEstimatedTime = DEFAULT_ESTIMATED_TIME_PER_CUSTOMER;
 
   return (
     <div

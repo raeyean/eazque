@@ -16,6 +16,10 @@ export const db = getFirestore(app);
 export const functions = getFunctions(app);
 
 if (import.meta.env.DEV) {
-  connectFirestoreEmulator(db, "localhost", 8080);
-  connectFunctionsEmulator(functions, "localhost", 5001);
+  try {
+    connectFirestoreEmulator(db, "localhost", 8080);
+    connectFunctionsEmulator(functions, "localhost", 5001);
+  } catch {
+    // Already connected — safe to ignore during HMR
+  }
 }

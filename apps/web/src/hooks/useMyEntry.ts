@@ -24,7 +24,10 @@ export function useMyEntry(
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!queueId) return;
+    if (!queueId) {
+      setLoading(false);
+      return;
+    }
 
     const q = query(
       collection(db, `businesses/${businessId}/queues/${queueId}/entries`),

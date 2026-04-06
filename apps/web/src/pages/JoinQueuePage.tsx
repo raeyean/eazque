@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { httpsCallable } from "firebase/functions";
 import { functions } from "../firebase";
+import { formatDisplayNumber } from "@eazque/shared";
 import { useBusinessData } from "../hooks/useBusinessData";
 import { useActiveQueue } from "../hooks/useActiveQueue";
 import DynamicForm from "../components/DynamicForm";
@@ -87,8 +88,8 @@ export default function JoinQueuePage() {
       )}
       <h1>{business.name}</h1>
       <p className="queue-info">
-        Now serving: Q-{String(queue.currentNumber).padStart(3, "0")} ·{" "}
-        {queue.nextNumber - queue.currentNumber - 1} waiting
+        Now serving: {formatDisplayNumber(queue.currentNumber)} ·{" "}
+        {Math.max(0, queue.nextNumber - queue.currentNumber - 1)} waiting
       </p>
       {error && <div className="error-message">{error}</div>}
       <DynamicForm
