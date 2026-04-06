@@ -12,6 +12,9 @@
     "test:functions": "npm run test --workspace=firebase/functions",
     "build:functions": "npm run build --workspace=firebase/functions",
     "typecheck:functions": "npm run typecheck --workspace=firebase/functions",
+    "dev:web": "npm run dev --workspace=apps/web",
+    "build:web": "npm run build --workspace=apps/web",
+    "test:web": "npm run test --workspace=apps/web",
     "lint": "echo \"No linter configured yet\""
   }
 }
