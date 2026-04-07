@@ -31,7 +31,11 @@ service cloud.firestore {
       // Staff subcollection
       match /staff/{staffId} {
         allow read: if isBusinessStaff(businessId);
-        allow create: if isBusinessOwner(businessId);
+        // Owner can manage staff; authenticated user can bootstrap own owner doc
+        allow create: if isBusinessOwner(businessId) ||
+          (isAuth() && staffId == request.auth.uid &&
+           request.resource.data.role == "owner" &&
+           businessId == request.auth.uid);
         allow update: if isBusinessOwner(businessId);
         allow delete: if isBusinessOwner(businessId);
       }
