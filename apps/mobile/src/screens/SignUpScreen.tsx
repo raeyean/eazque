@@ -1,0 +1,116 @@
+import { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import { useAuth } from "../contexts/AuthContext";
+import { colors, common } from "../theme";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+
+type Props = NativeStackScreenProps<{ Login: undefined; SignUp: undefined }, "SignUp">;
+
+export default function SignUpScreen({ navigation }: Props) {
+  const { signUp } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [businessName, setBusinessName] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleSignUp = async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      await signUp(email.trim(), password, businessName.trim());
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Sign up failed");
+      setLoading(false);
+    }
+  };
+
+  return (
+    <KeyboardAvoidingView
+      style={common.screen}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <View style={styles.container}>
+        <Text style={styles.title}>Create Business</Text>
+
+        {error && <Text style={common.errorText}>{error}</Text>}
+
+        <TextInput
+          style={common.input}
+          placeholder="Business Name"
+          placeholderTextColor={colors.secondary}
+          value={businessName}
+          onChangeText={setBusinessName}
+          accessibilityLabel="Business Name"
+        />
+        <TextInput
+          style={common.input}
+          placeholder="Email"
+          placeholderTextColor={colors.secondary}
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
+          accessibilityLabel="Email"
+        />
+        <TextInput
+          style={common.input}
+          placeholder="Password"
+          placeholderTextColor={colors.secondary}
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          accessibilityLabel="Password"
+        />
+
+        <Pressable
+          style={[common.button, loading && common.buttonDisabled]}
+          onPress={handleSignUp}
+          disabled={loading}
+        >
+          <Text style={common.buttonText}>
+            {loading ? "Creating..." : "Create Business"}
+          </Text>
+        </Pressable>
+
+        <Pressable
+          style={styles.linkButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.linkText}>Back to login</Text>
+        </Pressable>
+      </View>
+    </KeyboardAvoidingView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    padding: 24,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: colors.textDark,
+    textAlign: "center",
+    marginBottom: 24,
+  },
+  linkButton: {
+    marginTop: 16,
+    alignItems: "center",
+  },
+  linkText: {
+    color: colors.primary,
+    fontSize: 15,
+  },
+});
