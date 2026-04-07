@@ -19,6 +19,7 @@ import { auth, db } from "../config/firebase";
 interface AuthState {
   user: User | null;
   businessId: string | null;
+  role: "owner" | "staff" | null;
   loading: boolean;
 }
 
@@ -38,6 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({
     user: null,
     businessId: null,
+    role: null,
     loading: true,
   });
   const signingUpRef = useRef(false);
@@ -48,13 +50,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (user) {
         const bizDoc = await getDoc(doc(db, "businesses", user.uid));
-        setState({
-          user,
-          businessId: bizDoc.exists() ? user.uid : null,
-          loading: false,
-        });
+        if (bizDoc.exists()) {
+          // User owns this business — fetch their staff doc for role
+          const staffDoc = await getDoc(
+            doc(db, `businesses/${user.uid}/staff/${user.uid}`)
+          );
+          const role = staffDoc.exists()
+            ? (staffDoc.data().role as "owner" | "staff")
+            : null;
+          setState({ user, businessId: user.uid, role, loading: false });
+        } else {
+          setState({ user, businessId: null, role: null, loading: false });
+        }
       } else {
-        setState({ user: null, businessId: null, loading: false });
+        setState({ user: null, businessId: null, role: null, loading: false });
       }
     });
     return unsub;
@@ -109,7 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         completedCount: 0,
       });
 
-      setState({ user: cred.user, businessId: uid, loading: false });
+      setState({ user: cred.user, businessId: uid, role: "owner", loading: false });
     } finally {
       signingUpRef.current = false;
     }
