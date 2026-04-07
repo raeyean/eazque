@@ -15,6 +15,7 @@
     "dev:web": "npm run dev --workspace=apps/web",
     "build:web": "npm run build --workspace=apps/web",
     "test:web": "npm run test --workspace=apps/web",
+    "test:mobile": "npm run test --workspace=apps/mobile",
     "lint": "echo \"No linter configured yet\""
   }
 }
