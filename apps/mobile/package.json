@@ -38,6 +38,9 @@
     "setupFilesAfterEnv": ["<rootDir>/jest.setup.ts"],
     "transformIgnorePatterns": [
       "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@react-navigation/.*|firebase/.*|@firebase/.*)"
-    ]
+    ],
+    "moduleNameMapper": {
+      "@expo/vector-icons": "<rootDir>/__mocks__/@expo/vector-icons.js"
+    }
   }
 }
