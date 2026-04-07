@@ -1,4 +1,4 @@
-import type { FieldType, EntryStatus, QueueStatus, StaffRole } from "./constants";
+import type { FieldType, EntryStatus, QueueStatus, StaffRole, StaffStatus } from "./constants";
 
 export interface FormField {
   id: string;
@@ -37,6 +37,7 @@ export interface Staff {
   email: string;
   name: string;
   role: StaffRole;
+  status: StaffStatus;
   createdAt: Date;
 }
 

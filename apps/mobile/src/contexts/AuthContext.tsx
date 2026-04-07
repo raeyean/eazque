@@ -94,6 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email,
         name: businessName,
         role: "owner",
+        status: "active",
         createdAt: serverTimestamp(),
       });
 

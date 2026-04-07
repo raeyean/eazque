@@ -10,6 +10,9 @@ export type QueueStatus = (typeof QUEUE_STATUSES)[number];
 export const STAFF_ROLES = ["owner", "staff"] as const;
 export type StaffRole = (typeof STAFF_ROLES)[number];
 
+export const STAFF_STATUSES = ["active", "pending"] as const;
+export type StaffStatus = (typeof STAFF_STATUSES)[number];
+
 export const APPROACHING_THRESHOLD_DEFAULT = 3;
 export const ROLLING_AVERAGE_WINDOW = 20;
 export const DATA_DRIVEN_THRESHOLD = 5;
