@@ -1,7 +1,7 @@
 import { View, ActivityIndicator } from "react-native";
 import { useAuth } from "../contexts/AuthContext";
 import AuthStack from "./AuthStack";
-import MainTabs from "./MainTabs";
+import AppStack from "./AppStack";
 import { colors, common } from "../theme";
 
 export default function RootNavigator() {
@@ -19,5 +19,5 @@ export default function RootNavigator() {
     return <AuthStack />;
   }
 
-  return <MainTabs />;
+  return <AppStack />;
 }
