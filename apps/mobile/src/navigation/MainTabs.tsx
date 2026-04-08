@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import QueueScreen from "../screens/QueueScreen";
 import StaffScreen from "../screens/StaffScreen";
+import HistoryScreen from "../screens/HistoryScreen";
 import PlaceholderScreen from "../screens/PlaceholderScreen";
 import { useAuth } from "../contexts/AuthContext";
 import { colors } from "../theme";
@@ -56,7 +57,7 @@ export default function MainTabs() {
             : undefined,
         }}
       />
-      <Tab.Screen name="History" component={PlaceholderScreen} />
+      <Tab.Screen name="History" component={HistoryScreen} />
       <Tab.Screen name="Analytics" component={PlaceholderScreen} />
       {isOwner && (
         <Tab.Screen name="Staff" component={StaffScreen} />
