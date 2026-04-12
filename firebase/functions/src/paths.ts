@@ -13,4 +13,6 @@ export const paths = {
     `businesses/${businessId}/queues/${queueId}/entries`,
   entry: (businessId: string, queueId: string, entryId: string) =>
     `businesses/${businessId}/queues/${queueId}/entries/${entryId}`,
+  dailyStat: (businessId: string, date: string) =>
+    `businesses/${businessId}/dailyStats/${date}`,
 } as const;

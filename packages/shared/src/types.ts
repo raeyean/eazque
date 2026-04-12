@@ -67,6 +67,17 @@ export interface QueueEntry {
   completedAt: Date | null;
 }
 
+export interface DailyStats {
+  date: string;                                // YYYY-MM-DD
+  totalJoined: number;                         // all entries regardless of status
+  completedCount: number;                      // status === "completed"
+  skippedCount: number;                        // status === "skipped"
+  removedCount: number;                        // status === "removed"
+  avgServiceTime: number;                      // mean of (completedAt - servedAt) in minutes
+  avgWaitTime: number;                         // mean of (servedAt - joinedAt) in minutes
+  hourlyDistribution: Record<string, number>;  // hour string "0"–"23" → customer count
+}
+
 /** Fields safe to expose to other customers in the queue list */
 export interface QueueEntryPublic {
   id: string;
