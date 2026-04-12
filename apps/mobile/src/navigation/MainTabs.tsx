@@ -5,7 +5,7 @@ import { useNavigation } from "@react-navigation/native";
 import QueueScreen from "../screens/QueueScreen";
 import StaffScreen from "../screens/StaffScreen";
 import HistoryScreen from "../screens/HistoryScreen";
-import PlaceholderScreen from "../screens/PlaceholderScreen";
+import AnalyticsScreen from "../screens/AnalyticsScreen";
 import { useAuth } from "../contexts/AuthContext";
 import { colors } from "../theme";
 
@@ -58,7 +58,7 @@ export default function MainTabs() {
         }}
       />
       <Tab.Screen name="History" component={HistoryScreen} />
-      <Tab.Screen name="Analytics" component={PlaceholderScreen} />
+      <Tab.Screen name="Analytics" component={AnalyticsScreen} />
       {isOwner && (
         <Tab.Screen name="Staff" component={StaffScreen} />
       )}
