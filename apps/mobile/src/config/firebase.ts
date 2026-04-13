@@ -11,6 +11,7 @@ import {
   getFunctions,
   connectFunctionsEmulator,
 } from "firebase/functions";
+import { getStorage } from "firebase/storage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
 
@@ -33,6 +34,7 @@ export const auth = initializeAuth(app, {
 
 export const db = getFirestore(app);
 export const functions = getFunctions(app);
+export const storage = getStorage(app);
 
 if (__DEV__) {
   const host = Platform.OS === "android" ? "10.0.2.2" : "localhost";
