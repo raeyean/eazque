@@ -21,10 +21,13 @@ import NowServing from "../components/NowServing";
 import QueueStats from "../components/QueueStats";
 import NextButton from "../components/NextButton";
 import EntryList from "../components/EntryList";
+import BusinessAvatar from "../components/BusinessAvatar";
+import { useBusinessSettings } from "../hooks/useBusinessSettings";
 import { colors, common } from "../theme";
 
 export default function QueueScreen() {
   const { businessId } = useAuth();
+  const { business } = useBusinessSettings(businessId!);
   const { queue, queueId, loading: queueLoading } = useQueue(businessId!);
   const { entries, loading: entriesLoading } = useQueueEntries(
     businessId!,
@@ -102,6 +105,16 @@ export default function QueueScreen() {
   return (
     <View style={common.screen}>
       <View style={common.container}>
+        {business && (
+          <View style={styles.avatarHeader}>
+            <BusinessAvatar
+              uri={business.logo || undefined}
+              name={business.name}
+              size={32}
+            />
+            <Text style={styles.businessName}>{business.name}</Text>
+          </View>
+        )}
         <NowServing currentNumber={queue.currentNumber} />
         <QueueStats
           waitingCount={waitingEntries.length}
@@ -164,6 +177,17 @@ const styles = StyleSheet.create({
   center: {
     justifyContent: "center",
     alignItems: "center",
+  },
+  avatarHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 12,
+  },
+  businessName: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.textDark,
   },
   modalOverlay: {
     flex: 1,
