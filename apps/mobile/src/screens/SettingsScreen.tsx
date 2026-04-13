@@ -11,11 +11,14 @@ import {
 import DraggableFlatList, {
   type RenderItemParams,
 } from "react-native-draggable-flatlist";
+import * as ImagePicker from "expo-image-picker";
 import { useAuth } from "../contexts/AuthContext";
 import { useBusinessSettings } from "../hooks/useBusinessSettings";
 import { updateBusinessSettings } from "../services/settingsActions";
 import FormFieldItem from "../components/FormFieldItem";
 import FormFieldEditorModal from "../components/FormFieldEditorModal";
+import BusinessAvatar from "../components/BusinessAvatar";
+import { uploadBusinessLogo } from "../services/logoActions";
 import type { FormField } from "@eazque/shared";
 import { colors, common } from "../theme";
 
@@ -32,6 +35,8 @@ export default function SettingsScreen({ navigation }: any) {
   const [formFields, setFormFields] = useState<FormField[]>([]);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [logoUri, setLogoUri] = useState("");
+  const [uploading, setUploading] = useState(false);
   const [editingField, setEditingField] = useState<FormField | null>(null);
   const [showFieldEditor, setShowFieldEditor] = useState(false);
 
@@ -44,6 +49,7 @@ export default function SettingsScreen({ navigation }: any) {
       setEstimatedTime(String(business.defaultEstimatedTimePerCustomer));
       setThreshold(String(business.approachingThreshold));
       setFormFields(business.formFields ?? []);
+      setLogoUri(business.logo ?? "");
       setDirty(false);
     }
   }, [business]);
@@ -76,6 +82,32 @@ export default function SettingsScreen({ navigation }: any) {
       },
     []
   );
+
+  const handleLogoPress = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+
+    if (result.canceled || !result.assets[0]) return;
+
+    const previousUri = logoUri;
+    const localUri = result.assets[0].uri;
+    setLogoUri(localUri);
+    setUploading(true);
+
+    try {
+      const url = await uploadBusinessLogo(businessId!, localUri);
+      setLogoUri(url);
+    } catch {
+      Alert.alert("Error", "Failed to upload logo. Please try again.");
+      setLogoUri(previousUri);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSave = async () => {
     const parsedTime = Number(estimatedTime);
@@ -191,6 +223,17 @@ export default function SettingsScreen({ navigation }: any) {
       <ScrollView style={common.container}>
         {/* Business Profile */}
         <Text style={styles.sectionTitle}>Business Profile</Text>
+
+        <View style={styles.avatarRow}>
+          <BusinessAvatar
+            uri={logoUri || undefined}
+            name={name || business.name}
+            size={72}
+            onPress={handleLogoPress}
+            uploading={uploading}
+          />
+          <Text style={styles.avatarHint}>Tap to change photo</Text>
+        </View>
 
         <Text style={styles.label}>Business Name</Text>
         <TextInput
@@ -366,5 +409,14 @@ const styles = StyleSheet.create({
   saveButton: {
     marginTop: 8,
     marginBottom: 40,
+  },
+  avatarRow: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  avatarHint: {
+    fontSize: 12,
+    color: colors.secondary,
+    marginTop: 6,
   },
 });
