@@ -38,10 +38,20 @@ body {
 
 .business-logo {
   display: block;
-  max-width: 80px;
-  max-height: 80px;
+  width: 72px;
+  height: 72px;
   margin: 0 auto 0.75rem;
-  border-radius: 12px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.business-initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 1.75rem;
+  font-weight: 700;
 }
 
 .loading {

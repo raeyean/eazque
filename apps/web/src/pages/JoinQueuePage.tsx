@@ -8,6 +8,24 @@ import { useActiveQueue } from "../hooks/useActiveQueue";
 import DynamicForm from "../components/DynamicForm";
 import type { JoinQueueResponse } from "@eazque/shared";
 
+const INITIALS_COLORS = [
+  "#B8926A", "#8B6F47", "#A0845C", "#C4A882", "#6B5240", "#D4956A",
+];
+
+function getWebInitials(name: string): string {
+  const words = name.trim().split(/\s+/);
+  if (words.length === 1) return words[0][0]?.toUpperCase() ?? "?";
+  return (words[0][0]?.toUpperCase() ?? "") + (words[1][0]?.toUpperCase() ?? "");
+}
+
+function getWebInitialsColor(name: string): string {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return INITIALS_COLORS[Math.abs(hash) % INITIALS_COLORS.length];
+}
+
 export default function JoinQueuePage() {
   const { businessId } = useParams<{ businessId: string }>();
   const navigate = useNavigate();
@@ -83,8 +101,15 @@ export default function JoinQueuePage() {
         { "--color-primary": business.primaryColor } as React.CSSProperties
       }
     >
-      {business.logo && (
+      {business.logo ? (
         <img src={business.logo} alt={business.name} className="business-logo" />
+      ) : (
+        <div
+          className="business-logo business-initials"
+          style={{ backgroundColor: getWebInitialsColor(business.name) }}
+        >
+          {getWebInitials(business.name)}
+        </div>
       )}
       <h1>{business.name}</h1>
       <p className="queue-info">
