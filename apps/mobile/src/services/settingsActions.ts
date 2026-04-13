@@ -4,6 +4,7 @@ import type { FormField } from "@eazque/shared";
 
 interface BusinessSettingsUpdate {
   name?: string;
+  logo?: string;
   primaryColor?: string;
   whatsappNumber?: string;
   whatsappApiKey?: string;
