@@ -5,6 +5,8 @@ export const paths = {
     `businesses/${businessId}/staff`,
   staffMember: (businessId: string, staffId: string) =>
     `businesses/${businessId}/staff/${staffId}`,
+  staffProfile: (uid: string) =>
+    `staffProfiles/${uid}`,
   queues: (businessId: string) =>
     `businesses/${businessId}/queues`,
   queue: (businessId: string, queueId: string) =>
