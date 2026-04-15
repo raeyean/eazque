@@ -1,23 +1,23 @@
-import { addDoc, deleteDoc, doc, collection, serverTimestamp } from "firebase/firestore";
-import { db } from "../config/firebase";
+import { httpsCallable } from "firebase/functions";
+import { functions } from "../config/firebase";
 
 export async function addStaffMember(
   businessId: string,
   email: string,
-  name: string
-) {
-  await addDoc(collection(db, `businesses/${businessId}/staff`), {
-    email,
+  name: string,
+  password: string
+): Promise<void> {
+  await httpsCallable(functions, "createStaffAccount")({
+    businessId,
     name,
-    role: "staff",
-    status: "pending",
-    createdAt: serverTimestamp(),
+    email,
+    password,
   });
 }
 
 export async function removeStaffMember(
   businessId: string,
   staffId: string
-) {
-  await deleteDoc(doc(db, `businesses/${businessId}/staff/${staffId}`));
+): Promise<void> {
+  await httpsCallable(functions, "removeStaffAccount")({ businessId, staffId });
 }

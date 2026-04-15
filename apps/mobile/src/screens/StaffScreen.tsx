@@ -21,6 +21,7 @@ export default function StaffScreen() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newEmail, setNewEmail] = useState("");
   const [newName, setNewName] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [adding, setAdding] = useState(false);
 
   const handleRemove = (staffId: string) => {
@@ -42,14 +43,20 @@ export default function StaffScreen() {
   const handleAdd = async () => {
     const email = newEmail.trim().toLowerCase();
     const name = newName.trim();
+    const password = newPassword;
 
-    if (!email || !name) {
-      Alert.alert("Error", "Please enter both email and name.");
+    if (!email || !name || !password) {
+      Alert.alert("Error", "Please enter name, email, and password.");
       return;
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       Alert.alert("Error", "Please enter a valid email address.");
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert("Error", "Password must be at least 6 characters.");
       return;
     }
 
@@ -60,10 +67,11 @@ export default function StaffScreen() {
 
     setAdding(true);
     try {
-      await addStaffMember(businessId!, email, name);
+      await addStaffMember(businessId!, email, name, password);
       setShowAddModal(false);
       setNewEmail("");
       setNewName("");
+      setNewPassword("");
     } catch {
       Alert.alert("Error", "Failed to add staff member. Please try again.");
     } finally {
@@ -102,7 +110,10 @@ export default function StaffScreen() {
         visible={showAddModal}
         transparent
         animationType="fade"
-        onRequestClose={() => setShowAddModal(false)}
+        onRequestClose={() => {
+          setShowAddModal(false);
+          setNewPassword("");
+        }}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -126,10 +137,22 @@ export default function StaffScreen() {
               keyboardType="email-address"
               accessibilityLabel="Staff email"
             />
+            <TextInput
+              style={common.input}
+              value={newPassword}
+              onChangeText={setNewPassword}
+              placeholder="Password (min 6 chars)"
+              placeholderTextColor={colors.secondary}
+              secureTextEntry
+              accessibilityLabel="Staff password"
+            />
             <View style={styles.modalButtons}>
               <Pressable
                 style={styles.cancelButton}
-                onPress={() => setShowAddModal(false)}
+                onPress={() => {
+                  setShowAddModal(false);
+                  setNewPassword("");
+                }}
               >
                 <Text style={styles.cancelText}>Cancel</Text>
               </Pressable>
