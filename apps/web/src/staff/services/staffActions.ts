@@ -1,10 +1,10 @@
 import { httpsCallable } from "firebase/functions";
-import { functions } from "../config/firebase";
+import { functions } from "../../firebase";
 
-export async function addStaffMember(
+export async function createStaffAccount(
   businessId: string,
-  email: string,
   name: string,
+  email: string,
   password: string
 ): Promise<void> {
   await httpsCallable(functions, "createStaffAccount")({
@@ -15,7 +15,7 @@ export async function addStaffMember(
   });
 }
 
-export async function removeStaffMember(
+export async function removeStaffAccount(
   businessId: string,
   staffId: string
 ): Promise<void> {
