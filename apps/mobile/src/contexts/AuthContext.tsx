@@ -90,7 +90,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logo: "",
         primaryColor: "#B8926A",
         whatsappNumber: "",
-        whatsappApiKey: "",
         defaultEstimatedTimePerCustomer: 10,
         approachingThreshold: 3,
         formFields: [],

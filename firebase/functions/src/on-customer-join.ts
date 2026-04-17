@@ -57,6 +57,18 @@ export const onCustomerJoin = onCall(async (request) => {
       ...entryData,
       joinedAt: FieldValue.serverTimestamp(),
     });
+
+    // Mirror public fields to publicEntries (no PII)
+    const publicEntryRef = db.doc(
+      paths.publicEntry(businessId, queueId, entryRef.id)
+    );
+    transaction.set(publicEntryRef, {
+      queueNumber: nextNumber,
+      displayNumber: entryData.displayNumber,
+      status: "waiting",
+      sessionToken,
+    });
+
     transaction.update(queueRef, { nextNumber: nextNumber + 1 });
 
     const positionInQueue = nextNumber - queue.currentNumber;

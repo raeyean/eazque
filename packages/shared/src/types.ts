@@ -14,12 +14,17 @@ export interface Business {
   logo: string;
   primaryColor: string;
   whatsappNumber: string;
-  whatsappApiKey: string;
   defaultEstimatedTimePerCustomer: number;
   approachingThreshold: number;
   formFields: FormField[];
   createdAt: Date;
   updatedAt: Date;
+}
+
+/** Sensitive credentials stored in private secrets/whatsapp subcollection (owner-only) */
+export interface BusinessSecrets {
+  whatsappApiKey: string;
+  whatsappPhoneNumberId: string;
 }
 
 /** Fields safe to expose to unauthenticated customers */
@@ -84,6 +89,15 @@ export interface QueueEntryPublic {
   queueNumber: number;
   displayNumber: string;
   status: EntryStatus;
+}
+
+/** Mirror document in publicEntries subcollection — no PII, readable by anyone */
+export interface PublicEntry {
+  id: string;
+  queueNumber: number;
+  displayNumber: string;
+  status: EntryStatus;
+  sessionToken: string;
 }
 
 /** Response from onCustomerJoin callable */

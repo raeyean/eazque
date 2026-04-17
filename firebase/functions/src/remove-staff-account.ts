@@ -13,11 +13,9 @@ export const removeStaffAccount = onCall(async (request) => {
     staffId: string;
   };
 
-  if (request.auth.uid !== businessId) {
-    throw new HttpsError(
-      "permission-denied",
-      "Only the business owner can remove staff"
-    );
+  const ownerSnap = await db.doc(paths.staffMember(businessId, request.auth.uid)).get();
+  if (!ownerSnap.exists || ownerSnap.data()?.role !== "owner") {
+    throw new HttpsError("permission-denied", "Only the business owner can remove staff");
   }
 
   if (!staffId) {

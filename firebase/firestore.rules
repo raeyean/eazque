@@ -21,12 +21,16 @@ service cloud.firestore {
     // === Business documents ===
     match /businesses/{businessId} {
       // Public read for customer-facing fields (name, logo, primaryColor, formFields, whatsappNumber)
-      // Note: whatsappApiKey is in this doc — a known limitation for MVP.
-      // Production should move sensitive fields to a private subcollection.
       allow read: if true;
       allow create: if isAuth();
       allow update: if isBusinessOwner(businessId);
       allow delete: if false;
+
+      // Secrets subcollection — WhatsApp API credentials, owner-only
+      match /secrets/{secretId} {
+        allow read: if isBusinessOwner(businessId);
+        allow write: if false; // Cloud Functions (admin SDK) only
+      }
 
       // Staff subcollection
       match /staff/{staffId} {
@@ -45,17 +49,17 @@ service cloud.firestore {
         allow read: if true;
         allow write: if isBusinessStaff(businessId);
 
-        // Entry subcollection
-        match /entries/{entryId} {
-          // Public read: allows customer web app to show queue list
-          // Note: exposes customerName/phone — production should restrict to
-          // staff + entry owner (via anonymous auth UID match).
+        // Public entry mirror — no PII, real-time readable by anyone
+        match /publicEntries/{entryId} {
           allow read: if true;
-          // Only Cloud Functions can create entries (onCustomerJoin)
-          allow create: if false;
-          // Staff can update entries (status changes: serving, completed, skipped)
+          allow write: if false; // Cloud Functions (admin SDK) only
+        }
+
+        // Real entries — contain PII (customerName, phone, formData), staff-only
+        match /entries/{entryId} {
+          allow read: if isBusinessStaff(businessId);
+          allow create: if false; // Cloud Functions (onCustomerJoin) only
           allow update: if isBusinessStaff(businessId);
-          // Only owner can delete entries
           allow delete: if isBusinessOwner(businessId);
         }
       }

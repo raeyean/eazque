@@ -26,7 +26,7 @@ type FieldType = "text" | "number" | "dropdown" | "checkbox";
 
 export default function SettingsPage() {
   const { businessId } = useStaffAuth();
-  const { business, loading } = useBusinessSettings(businessId!);
+  const { business, secrets, loading } = useBusinessSettings(businessId!);
 
   const [name, setName] = useState("");
   const [primaryColor, setPrimaryColor] = useState("");
@@ -53,7 +53,6 @@ export default function SettingsPage() {
       setName(business.name);
       setPrimaryColor(business.primaryColor);
       setWhatsappNumber(business.whatsappNumber);
-      setWhatsappApiKey(business.whatsappApiKey);
       setEstimatedTime(String(business.defaultEstimatedTimePerCustomer));
       setThreshold(String(business.approachingThreshold));
       setFormFields(business.formFields ?? []);
@@ -61,6 +60,12 @@ export default function SettingsPage() {
       setDirty(false);
     }
   }, [business]);
+
+  useEffect(() => {
+    if (secrets) {
+      setWhatsappApiKey(secrets.whatsappApiKey ?? "");
+    }
+  }, [secrets]);
 
   const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

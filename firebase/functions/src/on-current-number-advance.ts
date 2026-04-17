@@ -16,11 +16,15 @@ export const onCurrentNumberAdvance = onDocumentUpdated(
 
     const { businessId, queueId } = event.params;
 
-    const businessSnap = await db.doc(paths.business(businessId)).get();
+    const [businessSnap, secretsSnap] = await Promise.all([
+      db.doc(paths.business(businessId)).get(),
+      db.doc(paths.businessSecrets(businessId)).get(),
+    ]);
     const business = businessSnap.data();
-    if (!business?.whatsappApiKey || !business?.whatsappPhoneNumberId) return;
+    const secrets = secretsSnap.data();
+    if (!secrets?.whatsappApiKey || !secrets?.whatsappPhoneNumberId) return;
 
-    // Get all waiting entries
+    // Get all waiting entries (real entries — Cloud Functions have admin access)
     const entriesSnap = await db
       .collection(paths.entries(businessId, queueId))
       .where("status", "==", "waiting")
@@ -34,19 +38,19 @@ export const onCurrentNumberAdvance = onDocumentUpdated(
 
     const approaching = findApproachingEntries(
       after.currentNumber,
-      business.approachingThreshold ?? 3,
+      business?.approachingThreshold ?? 3,
       waitingEntries
     );
 
     await Promise.all(
       approaching.map((entry) =>
         sendWhatsAppNotification({
-          apiKey: business.whatsappApiKey,
-          phoneNumberId: business.whatsappPhoneNumberId,
+          apiKey: secrets.whatsappApiKey,
+          phoneNumberId: secrets.whatsappPhoneNumberId,
           to: entry.phone,
           template: "approaching",
           params: {
-            businessName: business.name,
+            businessName: business?.name ?? "",
             displayNumber: entry.displayNumber,
           },
         })

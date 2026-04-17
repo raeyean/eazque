@@ -17,7 +17,7 @@ export function useQueueEntries(
     }
 
     const q = query(
-      collection(db, `businesses/${businessId}/queues/${queueId}/entries`),
+      collection(db, `businesses/${businessId}/queues/${queueId}/publicEntries`),
       where("status", "in", ["waiting", "serving"])
     );
     const unsub = onSnapshot(q, (snap) => {
