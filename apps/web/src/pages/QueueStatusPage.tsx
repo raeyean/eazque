@@ -43,6 +43,10 @@ export default function QueueStatusPage() {
     return <div className="loading">Loading your queue status...</div>;
   }
 
+  if (!loading && !entry && !navState.displayNumber) {
+    return <div className="error">Queue entry not found. Your session may have expired.</div>;
+  }
+
   const displayNumber =
     entry?.displayNumber ?? navState.displayNumber ?? "...";
   const queueNumber = entry?.queueNumber ?? navState.queueNumber ?? 0;

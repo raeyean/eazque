@@ -39,4 +39,19 @@ describe("QueuePosition", () => {
     render(<QueuePosition {...defaultProps} myStatus="serving" />);
     expect(screen.getByText(/your turn/i)).toBeInTheDocument();
   });
+
+  it("shows served message when status is completed", () => {
+    render(<QueuePosition {...defaultProps} myStatus="completed" />);
+    expect(screen.getByText(/you've been served/i)).toBeInTheDocument();
+  });
+
+  it("shows skipped message when status is skipped", () => {
+    render(<QueuePosition {...defaultProps} myStatus="skipped" />);
+    expect(screen.getByText(/you were skipped/i)).toBeInTheDocument();
+  });
+
+  it("shows removed message when status is removed", () => {
+    render(<QueuePosition {...defaultProps} myStatus="removed" />);
+    expect(screen.getByText(/you've been removed/i)).toBeInTheDocument();
+  });
 });
