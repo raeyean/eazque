@@ -43,6 +43,7 @@ yarn-error.*
 
 # Monorepo
 .superpowers/
+.worktrees/
 
 # Firebase
 firebase/functions/lib/
