@@ -338,6 +338,15 @@ export default function SettingsScreen({ navigation }: any) {
           <Text style={styles.addFieldText}>+ Add Field</Text>
         </Pressable>
 
+        {/* QR Code */}
+        <Pressable
+          style={styles.navRow}
+          onPress={() => navigation.navigate("QRCode")}
+        >
+          <Text style={styles.navRowLabel}>QR Code</Text>
+          <Text style={styles.navRowChevron}>›</Text>
+        </Pressable>
+
         {/* Save Button */}
         <Pressable
           style={[
@@ -418,5 +427,25 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.secondary,
     marginTop: 6,
+  },
+  navRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  navRowLabel: {
+    fontSize: 16,
+    color: colors.textDark,
+    fontWeight: "500",
+  },
+  navRowChevron: {
+    fontSize: 20,
+    color: colors.secondary,
   },
 });
