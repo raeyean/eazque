@@ -27,12 +27,16 @@ export default function QueuePosition({
     defaultEstimatedTime,
   });
 
-  const isMyTurn = myStatus === "serving" || positionInQueue <= 0;
-
   return (
     <div className="queue-position">
       <div className="my-number">{myDisplayNumber}</div>
-      {isMyTurn ? (
+      {myStatus === "completed" ? (
+        <div className="status-done">You've been served. Thank you!</div>
+      ) : myStatus === "skipped" ? (
+        <div className="status-skipped">You were skipped. Please speak to staff.</div>
+      ) : myStatus === "removed" ? (
+        <div className="status-removed">You've been removed from the queue.</div>
+      ) : myStatus === "serving" ? (
         <div className="your-turn">It's your turn!</div>
       ) : (
         <>
