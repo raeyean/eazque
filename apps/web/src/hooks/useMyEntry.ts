@@ -30,7 +30,7 @@ export function useMyEntry(
     }
 
     const q = query(
-      collection(db, `businesses/${businessId}/queues/${queueId}/entries`),
+      collection(db, `businesses/${businessId}/queues/${queueId}/publicEntries`),
       where("sessionToken", "==", sessionToken),
       limit(1)
     );

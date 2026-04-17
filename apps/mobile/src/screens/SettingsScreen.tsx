@@ -24,7 +24,7 @@ import { colors, common } from "../theme";
 
 export default function SettingsScreen({ navigation }: any) {
   const { businessId } = useAuth();
-  const { business, loading } = useBusinessSettings(businessId!);
+  const { business, secrets, loading } = useBusinessSettings(businessId!);
 
   const [name, setName] = useState("");
   const [primaryColor, setPrimaryColor] = useState("");
@@ -45,7 +45,6 @@ export default function SettingsScreen({ navigation }: any) {
       setName(business.name);
       setPrimaryColor(business.primaryColor);
       setWhatsappNumber(business.whatsappNumber);
-      setWhatsappApiKey(business.whatsappApiKey);
       setEstimatedTime(String(business.defaultEstimatedTimePerCustomer));
       setThreshold(String(business.approachingThreshold));
       setFormFields(business.formFields ?? []);
@@ -53,6 +52,12 @@ export default function SettingsScreen({ navigation }: any) {
       setDirty(false);
     }
   }, [business]);
+
+  useEffect(() => {
+    if (secrets) {
+      setWhatsappApiKey(secrets.whatsappApiKey ?? "");
+    }
+  }, [secrets]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("beforeRemove", (e: any) => {

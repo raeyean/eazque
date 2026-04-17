@@ -40,22 +40,34 @@ export const onEntryStatusChange = onDocumentUpdated(
 
     // Status → "serving" or "skipped": send WhatsApp notification
     if (newStatus === "serving" || newStatus === "skipped") {
-      const businessSnap = await db.doc(paths.business(businessId)).get();
+      const [businessSnap, secretsSnap] = await Promise.all([
+        db.doc(paths.business(businessId)).get(),
+        db.doc(paths.businessSecrets(businessId)).get(),
+      ]);
       const business = businessSnap.data();
-      if (!business?.whatsappApiKey || !business?.whatsappPhoneNumberId) return;
+      const secrets = secretsSnap.data();
+      if (!secrets?.whatsappApiKey || !secrets?.whatsappPhoneNumberId) return;
       if (!after.phone) return;
 
       const template = newStatus === "serving" ? "your_turn" : "skipped";
       await sendWhatsAppNotification({
-        apiKey: business.whatsappApiKey,
-        phoneNumberId: business.whatsappPhoneNumberId,
+        apiKey: secrets.whatsappApiKey,
+        phoneNumberId: secrets.whatsappPhoneNumberId,
         to: after.phone,
         template,
         params: {
-          businessName: business.name,
+          businessName: business?.name ?? "",
           displayNumber: after.displayNumber,
         },
       });
+    }
+
+    // Mirror status change to publicEntries
+    try {
+      await db.doc(paths.publicEntry(businessId, queueId, event.params.entryId))
+        .update({ status: after.status });
+    } catch {
+      // publicEntry may not exist for entries created before this migration
     }
   }
 );
