@@ -14,12 +14,12 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
+export const db = getFirestore(app, import.meta.env.VITE_FIRESTORE_DATABASE_ID || "(default)");
 export const functions = getFunctions(app);
 export const auth = getAuth(app);
 export const storage = getStorage(app);
 
-if (import.meta.env.DEV) {
+if (import.meta.env.DEV && import.meta.env.VITE_USE_EMULATOR === "true") {
   try {
     connectFirestoreEmulator(db, "localhost", 8080);
     connectFunctionsEmulator(functions, "localhost", 5001);

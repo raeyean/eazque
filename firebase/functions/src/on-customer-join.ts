@@ -6,7 +6,7 @@ import { db } from "./config";
 import { paths } from "./paths";
 import { createQueueEntryData } from "./queue-logic";
 
-export const onCustomerJoin = onCall(async (request) => {
+export const onCustomerJoin = onCall({ cors: true, invoker: "public" }, async (request) => {
   const parsed = joinQueueRequestSchema.safeParse(request.data);
   if (!parsed.success) {
     throw new HttpsError(
@@ -76,7 +76,7 @@ export const onCustomerJoin = onCall(async (request) => {
       positionInQueue,
       avgServiceTime: queue.avgServiceTime,
       completedCount: queue.completedCount,
-      defaultEstimatedTime: business.defaultEstimatedTimePerCustomer,
+      defaultEstimatedTime: business.defaultEstimatedTimePerCustomer ?? 10,
     });
 
     return {

@@ -4,7 +4,7 @@ import { FieldValue } from "firebase-admin/firestore";
 import { db } from "./config";
 import { paths } from "./paths";
 
-export const createStaffAccount = onCall(async (request) => {
+export const createStaffAccount = onCall({ cors: true, invoker: "public" }, async (request) => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "Must be signed in");
   }

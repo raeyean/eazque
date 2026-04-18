@@ -3,7 +3,7 @@ import { getAuth } from "firebase-admin/auth";
 import { db } from "./config";
 import { paths } from "./paths";
 
-export const removeStaffAccount = onCall(async (request) => {
+export const removeStaffAccount = onCall({ cors: true, invoker: "public" }, async (request) => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "Must be signed in");
   }
