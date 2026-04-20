@@ -19,7 +19,7 @@ export default function QueuePosition({
   defaultEstimatedTime,
   myStatus,
 }: QueuePositionProps) {
-  const positionInQueue = myQueueNumber - currentNumber;
+  const positionInQueue = Math.max(0, myQueueNumber - currentNumber - 1);
   const waitMinutes = estimateWaitMinutes({
     positionInQueue,
     avgServiceTime,

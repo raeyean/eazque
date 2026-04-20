@@ -25,14 +25,14 @@ describe("QueuePosition", () => {
 
   it("shows people ahead count", () => {
     render(<QueuePosition {...defaultProps} />);
-    // 5 - 2 = 3 ahead
-    expect(screen.getByText(/3 ahead of you/)).toBeInTheDocument();
+    // 5 - 2 - 1 = 2 ahead (Q-003, Q-004)
+    expect(screen.getByText(/2 ahead of you/)).toBeInTheDocument();
   });
 
   it("shows estimated wait time", () => {
     render(<QueuePosition {...defaultProps} />);
-    // 3 * 10 = 30 min (data-driven, completedCount >= 5)
-    expect(screen.getByText(/30 min wait/)).toBeInTheDocument();
+    // 2 * 10 = 20 min (data-driven, completedCount >= 5)
+    expect(screen.getByText(/20 min wait/)).toBeInTheDocument();
   });
 
   it("shows your turn message when status is serving", () => {

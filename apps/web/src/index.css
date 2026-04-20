@@ -36,6 +36,40 @@ body {
   margin-bottom: 0.5rem;
 }
 
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 0.5rem;
+}
+
+.page-header h1 {
+  margin-bottom: 0;
+}
+
+.refresh-button {
+  position: absolute;
+  right: 0;
+  background: none;
+  border: 1px solid var(--color-secondary);
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  font-size: 1rem;
+  cursor: pointer;
+  color: var(--color-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.refresh-button:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
 .business-logo {
   display: block;
   width: 72px;
