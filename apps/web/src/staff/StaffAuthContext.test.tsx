@@ -5,7 +5,8 @@ import { StaffAuthProvider, useStaffAuth } from "./StaffAuthContext";
 let capturedCallback: ((user: any) => void) | null = null;
 const mockGetDoc = vi.fn();
 
-vi.mock("../firebase", () => ({ auth: {}, db: {} }));
+vi.mock("../firebase", () => ({ auth: {}, db: {}, functions: {}, storage: {} }));
+vi.mock("./services/signupActions", () => ({ createBusinessAndSignIn: vi.fn() }));
 
 vi.mock("firebase/auth", () => ({
   onAuthStateChanged: (_: any, cb: any) => {

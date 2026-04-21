@@ -5,6 +5,7 @@ import { StaffAuthProvider } from "./staff/StaffAuthContext";
 import StaffRoute from "./staff/StaffRoute";
 import StaffLayout from "./staff/StaffLayout";
 import LoginPage from "./staff/pages/LoginPage";
+import SignUpPage from "./staff/pages/SignUpPage";
 import QueuePage from "./staff/pages/QueuePage";
 import HistoryPage from "./staff/pages/HistoryPage";
 import AnalyticsPage from "./staff/pages/AnalyticsPage";
@@ -24,6 +25,7 @@ export default function App() {
 
         {/* Staff routes */}
         <Route path="/staff/login" element={<LoginPage />} />
+        <Route path="/staff/signup" element={<SignUpPage />} />
         <Route element={<StaffRoute />}>
           <Route element={<StaffLayout />}>
             <Route path="/staff/queue" element={<QueuePage />} />

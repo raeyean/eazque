@@ -31,12 +31,25 @@ export const joinQueueRequestSchema = z.object({
 
 export const businessProfileSchema = z.object({
   name: z.string().min(1),
-  whatsappNumber: z.string().min(1),
+  whatsappNumber: z.string(),
   defaultEstimatedTimePerCustomer: z.number().positive(),
   approachingThreshold: z.number().int().positive(),
   formFields: z.array(formFieldSchema),
 });
 
+export const createBusinessAccountSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+  ownerName: z.string().min(1).max(100),
+  businessName: z.string().min(1).max(100),
+  whatsappNumber: z.string().optional().default(""),
+  estimatedTime: z.number().positive().optional(),
+  approachingThreshold: z.number().int().positive().optional(),
+  primaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
+  formFields: z.array(formFieldSchema).optional().default([]),
+});
+
 export type FormFieldInput = z.infer<typeof formFieldSchema>;
 export type JoinQueueRequestInput = z.infer<typeof joinQueueRequestSchema>;
 export type BusinessProfileInput = z.infer<typeof businessProfileSchema>;
+export type CreateBusinessAccountInput = z.infer<typeof createBusinessAccountSchema>;

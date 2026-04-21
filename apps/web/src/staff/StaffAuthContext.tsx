@@ -7,6 +7,8 @@ import {
 import { doc, getDoc } from "firebase/firestore";
 import type { User } from "firebase/auth";
 import { auth, db } from "../firebase";
+import { createBusinessAndSignIn } from "./services/signupActions";
+import type { CreateBusinessAccountInput } from "@eazque/shared";
 
 interface StaffProfile {
   name: string;
@@ -22,6 +24,7 @@ interface StaffAuthContextValue {
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  signUp: (input: CreateBusinessAccountInput, logoFile: File | null) => Promise<void>;
 }
 
 const StaffAuthContext = createContext<StaffAuthContextValue>({
@@ -31,6 +34,7 @@ const StaffAuthContext = createContext<StaffAuthContextValue>({
   loading: true,
   signIn: async () => {},
   signOut: async () => {},
+  signUp: async () => {},
 });
 
 export function StaffAuthProvider({ children }: { children: React.ReactNode }) {
@@ -79,9 +83,14 @@ export function StaffAuthProvider({ children }: { children: React.ReactNode }) {
     await firebaseSignOut(auth);
   };
 
+  const signUp = async (input: CreateBusinessAccountInput, logoFile: File | null) => {
+    await createBusinessAndSignIn(input, logoFile);
+    // onAuthStateChanged fires automatically after signInWithEmailAndPassword
+  };
+
   return (
     <StaffAuthContext.Provider
-      value={{ user, businessId, staffProfile, loading, signIn, signOut }}
+      value={{ user, businessId, staffProfile, loading, signIn, signOut, signUp }}
     >
       {children}
     </StaffAuthContext.Provider>

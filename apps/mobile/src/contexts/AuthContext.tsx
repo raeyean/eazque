@@ -9,12 +9,12 @@ import {
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
   type User,
 } from "firebase/auth";
-import { doc, getDoc, setDoc, addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { auth, db } from "../config/firebase";
+import { httpsCallable } from "firebase/functions";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db, functions } from "../config/firebase";
 
 interface AuthState {
   user: User | null;
@@ -80,44 +80,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   ) => {
     signingUpRef.current = true;
     try {
-      const cred = await createUserWithEmailAndPassword(auth, email, password);
-      const uid = cred.user.uid;
-      const today = new Date().toISOString().split("T")[0];
+      const callable = httpsCallable<
+        { email: string; password: string; ownerName: string; businessName: string },
+        { uid: string; businessId: string }
+      >(functions, "createBusinessAccount");
+      const { data } = await callable({ email, password, ownerName: businessName, businessName });
 
-      // 1. Create business doc (rule: isAuth)
-      await setDoc(doc(db, "businesses", uid), {
-        name: businessName,
-        logo: "",
-        primaryColor: "#B8926A",
-        whatsappNumber: "",
-        defaultEstimatedTimePerCustomer: 10,
-        approachingThreshold: 3,
-        formFields: [],
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
+      const userCred = await signInWithEmailAndPassword(auth, email, password);
 
-      // 2. Create owner staff doc (rule: bootstrap — businessId == auth.uid)
-      await setDoc(doc(db, `businesses/${uid}/staff/${uid}`), {
-        email,
-        name: businessName,
-        role: "owner",
-        status: "active",
-        createdAt: serverTimestamp(),
-      });
-
-      // 3. Create default queue (rule: isBusinessStaff — staff doc now exists)
-      await addDoc(collection(db, `businesses/${uid}/queues`), {
-        name: "Main Queue",
-        status: "active",
-        currentNumber: 0,
-        nextNumber: 1,
-        date: today,
-        avgServiceTime: 0,
-        completedCount: 0,
-      });
-
-      setState({ user: cred.user, businessId: uid, role: "owner", loading: false });
+      setState({ user: userCred.user, businessId: data.businessId, role: "owner", loading: false });
     } finally {
       signingUpRef.current = false;
     }
