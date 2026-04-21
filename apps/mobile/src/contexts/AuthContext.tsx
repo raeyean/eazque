@@ -28,7 +28,8 @@ interface AuthContextValue extends AuthState {
   signUp: (
     email: string,
     password: string,
-    businessName: string
+    businessName: string,
+    ownerName: string
   ) => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -76,7 +77,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (
     email: string,
     password: string,
-    businessName: string
+    businessName: string,
+    ownerName: string
   ) => {
     signingUpRef.current = true;
     try {
@@ -84,7 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         { email: string; password: string; ownerName: string; businessName: string },
         { uid: string; businessId: string }
       >(functions, "createBusinessAccount");
-      const { data } = await callable({ email, password, ownerName: businessName, businessName });
+      const { data } = await callable({ email, password, ownerName, businessName });
 
       const userCred = await signInWithEmailAndPassword(auth, email, password);
 
