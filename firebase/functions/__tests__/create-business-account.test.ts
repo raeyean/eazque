@@ -140,6 +140,10 @@ describe("createBusinessAccountHandler", () => {
     expect(queueData.status).toBe("active");
     expect(queueData.currentNumber).toBe(0);
     expect(queueData.nextNumber).toBe(1);
+    expect(queueData.avgServiceTime).toBe(0);
+    expect(queueData.completedCount).toBe(0);
+    expect(typeof queueData.date).toBe("string");
+    expect(queueData.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 
   it("returns { uid, businessId } on success", async () => {

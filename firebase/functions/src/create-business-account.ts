@@ -79,6 +79,7 @@ export async function createBusinessAccountHandler(
       date: today,
       avgServiceTime: 0,
       completedCount: 0,
+      createdAt: FieldValue.serverTimestamp(),
     });
 
     await batch.commit();
