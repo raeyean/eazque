@@ -55,6 +55,9 @@ export default function LoginPage() {
           {loading ? "Signing in..." : "Sign In"}
         </button>
       </form>
+      <p style={{ marginTop: "1rem", textAlign: "center" }}>
+        New business? <a href="/staff/signup">Create an account</a>
+      </p>
     </div>
   );
 }
