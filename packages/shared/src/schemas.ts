@@ -31,7 +31,7 @@ export const joinQueueRequestSchema = z.object({
 
 export const businessProfileSchema = z.object({
   name: z.string().min(1),
-  whatsappNumber: z.string().min(1),
+  whatsappNumber: z.string(),
   defaultEstimatedTimePerCustomer: z.number().positive(),
   approachingThreshold: z.number().int().positive(),
   formFields: z.array(formFieldSchema),

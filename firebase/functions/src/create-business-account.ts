@@ -93,6 +93,7 @@ export async function createBusinessAccountHandler(
   }
 }
 
+// Public endpoint — App Check / rate-limiting to be added before production scale
 export const createBusinessAccount = onCall(
   { cors: true, invoker: "public" },
   async (request) => {

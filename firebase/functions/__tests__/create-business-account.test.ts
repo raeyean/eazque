@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { HttpsError } from "firebase-functions/v2/https";
+import {
+  PRIMARY_COLOR_DEFAULT,
+  DEFAULT_ESTIMATED_TIME_PER_CUSTOMER,
+  APPROACHING_THRESHOLD_DEFAULT,
+} from "@eazque/shared";
 
 // Hoist mock instances so they can be referenced in vi.mock factories
 const mocks = vi.hoisted(() => {
@@ -105,6 +110,24 @@ describe("createBusinessAccountHandler", () => {
     expect(docCalls.some((p) => p.includes("businesses/test-uid-123") && !p.includes("staff"))).toBe(true);
     expect(docCalls.some((p) => p.includes("businesses/test-uid-123/staff/test-uid-123"))).toBe(true);
     expect(docCalls.some((p) => p.includes("staffProfiles/test-uid-123"))).toBe(true);
+
+    // Verify data written to each doc
+    const businessData = mocks.mockBatch.set.mock.calls[0][1];
+    expect(businessData.name).toBe(validInput.businessName);
+    expect(businessData.logo).toBe("");
+    expect(businessData.primaryColor).toBe(PRIMARY_COLOR_DEFAULT);
+    expect(businessData.whatsappNumber).toBe("");
+    expect(businessData.defaultEstimatedTimePerCustomer).toBe(DEFAULT_ESTIMATED_TIME_PER_CUSTOMER);
+    expect(businessData.approachingThreshold).toBe(APPROACHING_THRESHOLD_DEFAULT);
+    expect(Array.isArray(businessData.formFields)).toBe(true);
+
+    const ownerStaffData = mocks.mockBatch.set.mock.calls[1][1];
+    expect(ownerStaffData.role).toBe("owner");
+    expect(ownerStaffData.status).toBe("active");
+    expect(ownerStaffData.name).toBe(validInput.ownerName);
+
+    const staffProfileData = mocks.mockBatch.set.mock.calls[2][1];
+    expect(staffProfileData).toEqual({ businessId: "test-uid-123" });
   });
 
   it("returns { uid, businessId } on success", async () => {
@@ -129,5 +152,11 @@ describe("createBusinessAccountHandler", () => {
     mocks.mockBatch.commit.mockRejectedValueOnce(new Error("Firestore commit failed"));
     await expect(createBusinessAccountHandler(validInput)).rejects.toThrow(HttpsError);
     expect(mocks.mockDeleteUser).toHaveBeenCalledWith("test-uid-123");
+  });
+
+  it("does not attempt rollback when createUser throws before uid is assigned", async () => {
+    mocks.mockCreateUser.mockRejectedValueOnce({ code: "auth/invalid-email", message: "bad" });
+    await expect(createBusinessAccountHandler(validInput)).rejects.toThrow();
+    expect(mocks.mockDeleteUser).not.toHaveBeenCalled();
   });
 });
