@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useStaffAuth } from "../StaffAuthContext";
 import FormFieldEditor from "../components/FormFieldEditor";
 import type { FormField } from "@eazque/shared";
@@ -23,7 +23,7 @@ export default function SignUpPage() {
   const { signUp } = useStaffAuth();
   const navigate = useNavigate();
 
-  const isDisabled = !email || !password || !ownerName || !businessName || submitting;
+  const isDisabled = !email || password.length < 6 || !ownerName || !businessName || submitting;
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null;
@@ -202,7 +202,7 @@ export default function SignUpPage() {
       </form>
 
       <p style={{ marginTop: "1rem", textAlign: "center" }}>
-        Already have an account? <a href="/staff/login">Sign in</a>
+        Already have an account? <Link to="/staff/login">Sign in</Link>
       </p>
     </div>
   );

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useStaffAuth } from "../StaffAuthContext";
 
 export default function LoginPage() {
@@ -56,7 +56,7 @@ export default function LoginPage() {
         </button>
       </form>
       <p style={{ marginTop: "1rem", textAlign: "center" }}>
-        New business? <a href="/staff/signup">Create an account</a>
+        New business? <Link to="/staff/signup">Create an account</Link>
       </p>
     </div>
   );

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { FormField } from "@eazque/shared";
 
-type FieldType = "text" | "number" | "dropdown" | "checkbox";
+type FieldType = "text" | "number" | "phone" | "dropdown" | "checkbox";
 
 interface Props {
   formFields: FormField[];
@@ -28,7 +28,7 @@ export default function FormFieldEditor({ formFields, onChange }: Props) {
   const openEditField = (field: FormField) => {
     setEditingField(field);
     setEditorLabel(field.label);
-    setEditorType(field.type as FieldType);
+    setEditorType(field.type as "text" | "number" | "phone" | "dropdown" | "checkbox");
     setEditorRequired(field.required);
     setEditorOptions(field.options?.join(", ") ?? "");
     setShowFieldEditor(true);
@@ -91,6 +91,7 @@ export default function FormFieldEditor({ formFields, onChange }: Props) {
               <select value={editorType} onChange={(e) => setEditorType(e.target.value as FieldType)}>
                 <option value="text">Text</option>
                 <option value="number">Number</option>
+                <option value="phone">Phone</option>
                 <option value="dropdown">Dropdown</option>
                 <option value="checkbox">Checkbox</option>
               </select>
