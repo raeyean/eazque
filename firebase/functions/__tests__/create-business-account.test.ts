@@ -13,9 +13,12 @@ const mocks = vi.hoisted(() => {
     commit: vi.fn().mockResolvedValue(undefined),
   };
   const mockDoc = vi.fn((path: string) => ({ path }));
+  const mockQueueRef = { path: "businesses/test-uid-123/queues/queue-auto-id" };
+  const mockCollection = vi.fn(() => ({ doc: vi.fn(() => mockQueueRef) }));
   const mockDb = {
     batch: vi.fn(() => mockBatch),
     doc: mockDoc,
+    collection: mockCollection,
   };
   const mockCreateUser = vi.fn().mockResolvedValue({ uid: "test-uid-123" });
   const mockDeleteUser = vi.fn().mockResolvedValue(undefined);
@@ -24,7 +27,7 @@ const mocks = vi.hoisted(() => {
     deleteUser: mockDeleteUser,
   };
   const mockGetAuth = vi.fn(() => mockAuthInstance);
-  return { mockBatch, mockDoc, mockDb, mockCreateUser, mockDeleteUser, mockAuthInstance, mockGetAuth };
+  return { mockBatch, mockDoc, mockQueueRef, mockCollection, mockDb, mockCreateUser, mockDeleteUser, mockAuthInstance, mockGetAuth };
 });
 
 vi.mock("firebase-admin/auth", () => ({
@@ -59,6 +62,7 @@ describe("createBusinessAccountHandler", () => {
     mocks.mockDeleteUser.mockResolvedValue(undefined);
     mocks.mockBatch.commit.mockResolvedValue(undefined);
     mocks.mockBatch.set.mockReset();
+    mocks.mockCollection.mockReturnValue({ doc: vi.fn(() => mocks.mockQueueRef) });
   });
 
   it("rejects missing required fields (no email)", async () => {
@@ -100,9 +104,9 @@ describe("createBusinessAccountHandler", () => {
     });
   });
 
-  it("writes business doc, owner staff doc, and staffProfile doc via batch", async () => {
+  it("writes business doc, owner staff doc, staffProfile doc, and initial queue via batch", async () => {
     await createBusinessAccountHandler(validInput);
-    expect(mocks.mockBatch.set).toHaveBeenCalledTimes(3);
+    expect(mocks.mockBatch.set).toHaveBeenCalledTimes(4);
     // Verify commit was called
     expect(mocks.mockBatch.commit).toHaveBeenCalledTimes(1);
     // Verify doc paths used
@@ -110,6 +114,8 @@ describe("createBusinessAccountHandler", () => {
     expect(docCalls.some((p) => p.includes("businesses/test-uid-123") && !p.includes("staff"))).toBe(true);
     expect(docCalls.some((p) => p.includes("businesses/test-uid-123/staff/test-uid-123"))).toBe(true);
     expect(docCalls.some((p) => p.includes("staffProfiles/test-uid-123"))).toBe(true);
+    // Verify collection was called for the queue
+    expect(mocks.mockCollection).toHaveBeenCalledWith("businesses/test-uid-123/queues");
 
     // Verify data written to each doc
     const businessData = mocks.mockBatch.set.mock.calls[0][1];
@@ -128,6 +134,12 @@ describe("createBusinessAccountHandler", () => {
 
     const staffProfileData = mocks.mockBatch.set.mock.calls[2][1];
     expect(staffProfileData).toEqual({ businessId: "test-uid-123" });
+
+    const queueData = mocks.mockBatch.set.mock.calls[3][1];
+    expect(queueData.name).toBe("Main Queue");
+    expect(queueData.status).toBe("active");
+    expect(queueData.currentNumber).toBe(0);
+    expect(queueData.nextNumber).toBe(1);
   });
 
   it("returns { uid, businessId } on success", async () => {

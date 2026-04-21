@@ -69,6 +69,18 @@ export async function createBusinessAccountHandler(
 
     batch.set(db.doc(paths.staffProfile(uid)), { businessId: uid });
 
+    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+    const queueRef = db.collection(paths.queues(uid)).doc();
+    batch.set(queueRef, {
+      name: "Main Queue",
+      status: "active",
+      currentNumber: 0,
+      nextNumber: 1,
+      date: today,
+      avgServiceTime: 0,
+      completedCount: 0,
+    });
+
     await batch.commit();
     return { uid, businessId: uid };
   } catch (err: any) {
