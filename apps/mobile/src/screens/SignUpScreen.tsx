@@ -19,6 +19,7 @@ export default function SignUpScreen({ navigation }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [businessName, setBusinessName] = useState("");
+  const [ownerName, setOwnerName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -26,7 +27,7 @@ export default function SignUpScreen({ navigation }: Props) {
     setError(null);
     setLoading(true);
     try {
-      await signUp(email.trim(), password, businessName.trim());
+      await signUp(email.trim(), password, businessName.trim(), ownerName.trim());
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Sign up failed");
       setLoading(false);
@@ -50,6 +51,14 @@ export default function SignUpScreen({ navigation }: Props) {
           value={businessName}
           onChangeText={setBusinessName}
           accessibilityLabel="Business Name"
+        />
+        <TextInput
+          style={common.input}
+          placeholder="Your Name"
+          placeholderTextColor={colors.secondary}
+          value={ownerName}
+          onChangeText={setOwnerName}
+          accessibilityLabel="Your Name"
         />
         <TextInput
           style={common.input}
