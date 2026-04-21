@@ -22,7 +22,7 @@ service cloud.firestore {
     match /businesses/{businessId} {
       // Public read for customer-facing fields (name, logo, primaryColor, formFields, whatsappNumber)
       allow read: if true;
-      allow create: if isAuth();
+      allow create: if false; // Cloud Function (createBusinessAccount) only
       allow update: if isBusinessOwner(businessId);
       allow delete: if false;
 
@@ -35,11 +35,8 @@ service cloud.firestore {
       // Staff subcollection
       match /staff/{staffId} {
         allow read: if isBusinessStaff(businessId);
-        // Owner can manage staff; authenticated user can bootstrap own owner doc
-        allow create: if isBusinessOwner(businessId) ||
-          (isAuth() && staffId == request.auth.uid &&
-           request.resource.data.role == "owner" &&
-           businessId == request.auth.uid);
+        // Cloud Function (createStaffAccount) for new staff; admin SDK for owner bootstrap
+        allow create: if isBusinessOwner(businessId);
         allow update: if isBusinessOwner(businessId);
         allow delete: if isBusinessOwner(businessId);
       }
