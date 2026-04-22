@@ -55,7 +55,12 @@ export default function LoginPage() {
           {loading ? "Signing in..." : "Sign In"}
         </button>
       </form>
-      <p style={{ marginTop: "1rem", textAlign: "center" }}>
+      <p style={{ marginTop: "0.75rem", textAlign: "center" }}>
+        <Link to="/staff/forgot-password" style={{ color: "#8b6f47", fontSize: "0.9rem" }}>
+          Forgot password?
+        </Link>
+      </p>
+      <p style={{ marginTop: "0.5rem", textAlign: "center" }}>
         New business? <Link to="/staff/signup">Create an account</Link>
       </p>
     </div>

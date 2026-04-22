@@ -8,6 +8,7 @@ import StaffRoute from "./staff/StaffRoute";
 import StaffLayout from "./staff/StaffLayout";
 import LoginPage from "./staff/pages/LoginPage";
 import SignUpPage from "./staff/pages/SignUpPage";
+import ForgotPasswordPage from "./staff/pages/ForgotPasswordPage";
 
 const QueuePage = lazy(() => import("./staff/pages/QueuePage"));
 const HistoryPage = lazy(() => import("./staff/pages/HistoryPage"));
@@ -30,6 +31,7 @@ export default function App() {
         {/* Staff routes */}
         <Route path="/staff/login" element={<LoginPage />} />
         <Route path="/staff/signup" element={<SignUpPage />} />
+        <Route path="/staff/forgot-password" element={<ForgotPasswordPage />} />
         <Route element={<StaffRoute />}>
           <Route element={<StaffLayout />}>
             <Suspense fallback={<div className="loading">Loading...</div>}>
