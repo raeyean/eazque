@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useStaffAuth } from "../StaffAuthContext";
 import { useQueue } from "../hooks/useQueue";
 import { useQueueEntries } from "../hooks/useQueueEntries";
-import { advanceQueue, skipEntry, removeEntry, addNote } from "../services/queueActions";
+import { advanceQueue, skipEntry, removeEntry, addNote, setQueueStatus } from "../services/queueActions";
 import { formatDisplayNumber } from "@eazque/shared";
 
 type PendingAction = { type: "skip" | "remove"; entryId: string; label: string };
@@ -16,6 +16,17 @@ export default function QueuePage() {
   );
   const [advancing, setAdvancing] = useState(false);
   const [advanceError, setAdvanceError] = useState<string | null>(null);
+  const [toggling, setToggling] = useState(false);
+
+  const handleTogglePause = async () => {
+    if (!queueId) return;
+    setToggling(true);
+    try {
+      await setQueueStatus(businessId!, queueId, queue!.status === "active" ? "paused" : "active");
+    } finally {
+      setToggling(false);
+    }
+  };
   const [noteEntryId, setNoteEntryId] = useState<string | null>(null);
   const [noteText, setNoteText] = useState("");
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
@@ -93,6 +104,30 @@ export default function QueuePage() {
         {advancing ? "Advancing..." : "Next →"}
       </button>
       {advanceError && <div className="error-message" style={{ marginTop: "0.5rem" }}>{advanceError}</div>}
+
+      <button
+        onClick={handleTogglePause}
+        disabled={toggling}
+        style={{
+          background: "none",
+          border: `1px solid ${queue.status === "paused" ? "#4caf50" : "#f0a500"}`,
+          color: queue.status === "paused" ? "#4caf50" : "#f0a500",
+          padding: "0.4rem 1.25rem",
+          borderRadius: 8,
+          cursor: "pointer",
+          fontSize: "0.9rem",
+          fontWeight: 600,
+          marginTop: "0.5rem",
+        }}
+      >
+        {toggling ? "..." : queue.status === "paused" ? "▶ Resume Queue" : "⏸ Pause Queue"}
+      </button>
+
+      {queue.status === "paused" && (
+        <div style={{ background: "#fff8e1", border: "1px solid #f0a500", borderRadius: 8, padding: "0.6rem 1rem", fontSize: "0.85rem", color: "#7a5800", marginTop: "0.25rem" }}>
+          Queue is paused — customers cannot join until resumed.
+        </div>
+      )}
 
       {servingEntry && (
         <div className="staff-serving-banner">

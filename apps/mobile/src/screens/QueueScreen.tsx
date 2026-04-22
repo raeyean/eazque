@@ -16,6 +16,7 @@ import {
   skipEntry,
   removeEntry,
   addNote,
+  setQueueStatus,
 } from "../services/queueActions";
 import NowServing from "../components/NowServing";
 import QueueStats from "../components/QueueStats";
@@ -34,6 +35,7 @@ export default function QueueScreen() {
     queueId
   );
   const [advancing, setAdvancing] = useState(false);
+  const [toggling, setToggling] = useState(false);
   const [noteEntryId, setNoteEntryId] = useState<string | null>(null);
   const [noteText, setNoteText] = useState("");
 
@@ -54,6 +56,19 @@ export default function QueueScreen() {
       Alert.alert("Error", "Failed to advance queue. Please try again.");
     } finally {
       setAdvancing(false);
+    }
+  };
+
+  const handleTogglePause = async () => {
+    if (!queueId || !queue) return;
+    const next = queue.status === "active" ? "paused" : "active";
+    setToggling(true);
+    try {
+      await setQueueStatus(businessId!, queueId, next);
+    } catch {
+      Alert.alert("Error", "Failed to update queue status.");
+    } finally {
+      setToggling(false);
     }
   };
 
@@ -122,9 +137,26 @@ export default function QueueScreen() {
         />
         <NextButton
           onPress={handleNext}
-          disabled={waitingEntries.length === 0}
+          disabled={waitingEntries.length === 0 || queue.status === "paused"}
           loading={advancing}
         />
+        <Pressable
+          onPress={handleTogglePause}
+          disabled={toggling}
+          style={[
+            styles.pauseButton,
+            queue.status === "paused" ? styles.resumeButton : styles.pauseButtonActive,
+          ]}
+        >
+          <Text style={[styles.pauseButtonText, queue.status === "paused" ? styles.resumeText : styles.pauseText]}>
+            {toggling ? "..." : queue.status === "paused" ? "▶  Resume Queue" : "⏸  Pause Queue"}
+          </Text>
+        </Pressable>
+        {queue.status === "paused" && (
+          <View style={styles.pausedBanner}>
+            <Text style={styles.pausedBannerText}>Queue paused — customers cannot join</Text>
+          </View>
+        )}
         <EntryList
           entries={waitingEntries}
           onSkip={handleSkip}
@@ -222,5 +254,42 @@ const styles = StyleSheet.create({
   cancelText: {
     color: colors.secondary,
     fontSize: 16,
+  },
+  pauseButton: {
+    alignSelf: "flex-start",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  pauseButtonActive: {
+    borderColor: "#f0a500",
+  },
+  resumeButton: {
+    borderColor: "#4caf50",
+  },
+  pauseButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  pauseText: {
+    color: "#f0a500",
+  },
+  resumeText: {
+    color: "#4caf50",
+  },
+  pausedBanner: {
+    backgroundColor: "#fff8e1",
+    borderWidth: 1,
+    borderColor: "#f0a500",
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 8,
+  },
+  pausedBannerText: {
+    color: "#7a5800",
+    fontSize: 13,
   },
 });
