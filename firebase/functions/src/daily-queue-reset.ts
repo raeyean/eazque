@@ -2,6 +2,7 @@ import { onSchedule } from "firebase-functions/v2/scheduler";
 import { db } from "./config";
 import { buildQueueResetData } from "./queue-logic";
 
+// Fires at UTC midnight. Set timeZone in onSchedule options before prod if businesses are in a single region.
 export const dailyQueueReset = onSchedule("every day 00:00", async () => {
   const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
   const resetData = buildQueueResetData(today);
