@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import JoinQueuePage from "./pages/JoinQueuePage";
 import QueueStatusPage from "./pages/QueueStatusPage";
+import DisplayPage from "./pages/DisplayPage";
 import { StaffAuthProvider } from "./staff/StaffAuthContext";
 import StaffRoute from "./staff/StaffRoute";
 import StaffLayout from "./staff/StaffLayout";
@@ -24,6 +25,7 @@ export default function App() {
           path="/q/:businessId/status/:sessionToken"
           element={<QueueStatusPage />}
         />
+        <Route path="/display/:businessId" element={<DisplayPage />} />
 
         {/* Staff routes */}
         <Route path="/staff/login" element={<LoginPage />} />

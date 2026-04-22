@@ -65,11 +65,22 @@ export default function QueuePage() {
 
   return (
     <div className="staff-page">
-      <div className="staff-now-serving">
-        <span className="staff-now-serving-label">Now serving</span>
-        <span className="staff-now-serving-number">
-          {formatDisplayNumber(queue.currentNumber)}
-        </span>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.25rem" }}>
+        <div className="staff-now-serving" style={{ marginBottom: 0 }}>
+          <span className="staff-now-serving-label">Now serving</span>
+          <span className="staff-now-serving-number">
+            {formatDisplayNumber(queue.currentNumber)}
+          </span>
+        </div>
+        <a
+          href={`/display/${businessId}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ fontSize: "0.8rem", color: "#b8926a", textDecoration: "none", whiteSpace: "nowrap" }}
+          title="Open public display for TV/kiosk"
+        >
+          ⬡ Display ↗
+        </a>
       </div>
       <div className="staff-queue-stats">
         {waitingEntries.length} waiting
