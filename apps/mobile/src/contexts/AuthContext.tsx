@@ -50,17 +50,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (signingUpRef.current) return;
 
       if (user) {
-        const bizDoc = await getDoc(doc(db, "businesses", user.uid));
-        if (bizDoc.exists()) {
-          // User owns this business — fetch their staff doc for role
-          const staffDoc = await getDoc(
-            doc(db, `businesses/${user.uid}/staff/${user.uid}`)
-          );
-          const role = staffDoc.exists()
-            ? (staffDoc.data().role as "owner" | "staff")
-            : null;
-          setState({ user, businessId: user.uid, role, loading: false });
-        } else {
+        try {
+          const profileSnap = await getDoc(doc(db, "staffProfiles", user.uid));
+          if (profileSnap.exists()) {
+            const bId = profileSnap.data().businessId as string;
+            const staffSnap = await getDoc(
+              doc(db, `businesses/${bId}/staff/${user.uid}`)
+            );
+            const role = staffSnap.exists()
+              ? (staffSnap.data().role as "owner" | "staff")
+              : null;
+            setState({ user, businessId: bId, role, loading: false });
+          } else {
+            setState({ user, businessId: null, role: null, loading: false });
+          }
+        } catch {
           setState({ user, businessId: null, role: null, loading: false });
         }
       } else {
