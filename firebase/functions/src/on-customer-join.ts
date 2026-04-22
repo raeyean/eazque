@@ -1,6 +1,7 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { FieldValue } from "firebase-admin/firestore";
 import crypto from "crypto";
+import { logger } from "firebase-functions/logger";
 import { joinQueueRequestSchema, estimateWaitMinutes } from "@eazque/shared";
 import { db } from "./config";
 import { paths } from "./paths";
@@ -17,6 +18,7 @@ export const onCustomerJoin = onCall({ cors: true, invoker: "public" }, async (r
   }
 
   const { businessId, queueId, customerName, phone, formData } = parsed.data;
+  logger.info("Customer joining queue", { businessId, queueId });
   const businessRef = db.doc(paths.business(businessId));
   const queueRef = db.doc(paths.queue(businessId, queueId));
   const entriesCol = db.collection(paths.entries(businessId, queueId));
@@ -89,5 +91,6 @@ export const onCustomerJoin = onCall({ cors: true, invoker: "public" }, async (r
     };
   });
 
+  logger.info("Customer joined queue", { businessId, queueId, queueNumber: result.queueNumber });
   return result;
 });

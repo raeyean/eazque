@@ -44,6 +44,10 @@ vi.mock("firebase-admin/firestore", () => ({
   },
 }));
 
+vi.mock("firebase-functions/logger", () => ({
+  logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+}));
+
 // Import AFTER mocks are set up
 import { createBusinessAccountHandler } from "../src/create-business-account";
 

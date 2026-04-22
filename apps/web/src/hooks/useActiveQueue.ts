@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { collection, query, limit, onSnapshot } from "firebase/firestore";
+import { collection, query, where, limit, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
 import type { Queue } from "@eazque/shared";
 
@@ -9,8 +9,10 @@ export function useActiveQueue(businessId: string) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const today = new Date().toISOString().split("T")[0];
     const q = query(
       collection(db, `businesses/${businessId}/queues`),
+      where("date", "==", today),
       limit(1)
     );
     const unsub = onSnapshot(q, (snap) => {
@@ -18,6 +20,9 @@ export function useActiveQueue(businessId: string) {
         const d = snap.docs[0];
         setQueue({ id: d.id, ...d.data() } as Queue);
         setQueueId(d.id);
+      } else {
+        setQueue(null);
+        setQueueId(null);
       }
       setLoading(false);
     });

@@ -1,6 +1,7 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { getAuth } from "firebase-admin/auth";
 import { FieldValue } from "firebase-admin/firestore";
+import { logger } from "firebase-functions/logger";
 import { db } from "./config";
 import { paths } from "./paths";
 import {
@@ -83,11 +84,13 @@ export async function createBusinessAccountHandler(
     });
 
     await batch.commit();
+    logger.info("Business account created", { uid });
     return { uid, businessId: uid };
   } catch (err: any) {
     if (uid) {
       try {
         await getAuth().deleteUser(uid);
+        logger.warn("Rolled back Auth user after batch failure", { uid });
       } catch {
         /* best-effort rollback */
       }

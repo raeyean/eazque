@@ -1,4 +1,5 @@
 import { onDocumentUpdated } from "firebase-functions/v2/firestore";
+import { logger } from "firebase-functions/logger";
 import { db } from "./config";
 import { paths } from "./paths";
 import { calculateNewAverage } from "./queue-logic";
@@ -13,6 +14,7 @@ export const onEntryStatusChange = onDocumentUpdated(
 
     const { businessId, queueId } = event.params;
     const newStatus: string = after.status;
+    logger.info("Entry status changed", { businessId, queueId, entryId: event.params.entryId, from: before.status, to: newStatus });
 
     // Status → "completed": update rolling average on queue
     if (newStatus === "completed" && after.servedAt && after.completedAt) {
