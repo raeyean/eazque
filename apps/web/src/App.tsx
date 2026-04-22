@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import JoinQueuePage from "./pages/JoinQueuePage";
 import QueueStatusPage from "./pages/QueueStatusPage";
@@ -6,11 +7,12 @@ import StaffRoute from "./staff/StaffRoute";
 import StaffLayout from "./staff/StaffLayout";
 import LoginPage from "./staff/pages/LoginPage";
 import SignUpPage from "./staff/pages/SignUpPage";
-import QueuePage from "./staff/pages/QueuePage";
-import HistoryPage from "./staff/pages/HistoryPage";
-import AnalyticsPage from "./staff/pages/AnalyticsPage";
-import SettingsPage from "./staff/pages/SettingsPage";
-import StaffPage from "./staff/pages/StaffPage";
+
+const QueuePage = lazy(() => import("./staff/pages/QueuePage"));
+const HistoryPage = lazy(() => import("./staff/pages/HistoryPage"));
+const AnalyticsPage = lazy(() => import("./staff/pages/AnalyticsPage"));
+const SettingsPage = lazy(() => import("./staff/pages/SettingsPage"));
+const StaffPage = lazy(() => import("./staff/pages/StaffPage"));
 
 export default function App() {
   return (
@@ -28,11 +30,13 @@ export default function App() {
         <Route path="/staff/signup" element={<SignUpPage />} />
         <Route element={<StaffRoute />}>
           <Route element={<StaffLayout />}>
-            <Route path="/staff/queue" element={<QueuePage />} />
-            <Route path="/staff/history" element={<HistoryPage />} />
-            <Route path="/staff/analytics" element={<AnalyticsPage />} />
-            <Route path="/staff/settings" element={<SettingsPage />} />
-            <Route path="/staff/staff" element={<StaffPage />} />
+            <Suspense fallback={<div className="loading">Loading...</div>}>
+              <Route path="/staff/queue" element={<QueuePage />} />
+              <Route path="/staff/history" element={<HistoryPage />} />
+              <Route path="/staff/analytics" element={<AnalyticsPage />} />
+              <Route path="/staff/settings" element={<SettingsPage />} />
+              <Route path="/staff/staff" element={<StaffPage />} />
+            </Suspense>
             <Route
               path="/staff"
               element={<Navigate to="/staff/queue" replace />}

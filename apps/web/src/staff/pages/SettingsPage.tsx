@@ -38,6 +38,9 @@ export default function SettingsPage() {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [logoError, setLogoError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
     if (business) {
@@ -63,12 +66,13 @@ export default function SettingsPage() {
     if (!file) return;
     const previousUri = logoUri;
     setLogoUri(URL.createObjectURL(file));
+    setLogoError(null);
     setUploading(true);
     try {
       const url = await uploadBusinessLogo(businessId!, file);
       setLogoUri(url);
     } catch {
-      alert("Failed to upload logo. Please try again.");
+      setLogoError("Failed to upload logo. Please try again.");
       setLogoUri(previousUri);
     } finally {
       setUploading(false);
@@ -78,10 +82,12 @@ export default function SettingsPage() {
   const handleSave = async () => {
     const parsedTime = Number(estimatedTime);
     const parsedThreshold = Number(threshold);
-    if (!name.trim()) { alert("Business name is required."); return; }
-    if (isNaN(parsedTime) || parsedTime <= 0) { alert("Estimated time must be a positive number."); return; }
+    setFormError(null);
+    setSaveSuccess(false);
+    if (!name.trim()) { setFormError("Business name is required."); return; }
+    if (isNaN(parsedTime) || parsedTime <= 0) { setFormError("Estimated time must be a positive number."); return; }
     if (isNaN(parsedThreshold) || parsedThreshold < 1 || !Number.isInteger(parsedThreshold)) {
-      alert("Approaching threshold must be a positive whole number."); return;
+      setFormError("Approaching threshold must be a positive whole number."); return;
     }
     setSaving(true);
     try {
@@ -95,9 +101,10 @@ export default function SettingsPage() {
         formFields,
       });
       setDirty(false);
-      alert("Settings saved.");
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
     } catch {
-      alert("Failed to save settings. Please try again.");
+      setFormError("Failed to save settings. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -133,6 +140,7 @@ export default function SettingsPage() {
               disabled={uploading}
             />
           </label>
+          {logoError && <div className="error-message" style={{ marginTop: "0.5rem" }}>{logoError}</div>}
         </div>
       </div>
 
@@ -175,6 +183,9 @@ export default function SettingsPage() {
         formFields={formFields}
         onChange={(f) => { setFormFields(f); setDirty(true); }}
       />
+
+      {formError && <div className="error-message">{formError}</div>}
+      {saveSuccess && <div style={{ color: "#4caf50", fontWeight: 600, marginBottom: "0.5rem" }}>Settings saved.</div>}
 
       <button
         className="staff-btn"

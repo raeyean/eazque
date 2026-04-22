@@ -5,6 +5,8 @@ import { useQueueEntries } from "../hooks/useQueueEntries";
 import { advanceQueue, skipEntry, removeEntry, addNote } from "../services/queueActions";
 import { formatDisplayNumber } from "@eazque/shared";
 
+type PendingAction = { type: "skip" | "remove"; entryId: string; label: string };
+
 export default function QueuePage() {
   const { businessId } = useStaffAuth();
   const { queue, queueId, loading: queueLoading } = useQueue(businessId!);
@@ -13,8 +15,10 @@ export default function QueuePage() {
     queueId
   );
   const [advancing, setAdvancing] = useState(false);
+  const [advanceError, setAdvanceError] = useState<string | null>(null);
   const [noteEntryId, setNoteEntryId] = useState<string | null>(null);
   const [noteText, setNoteText] = useState("");
+  const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
 
   const waitingEntries = entries.filter((e) => e.status === "waiting");
   const servingEntry = entries.find((e) => e.status === "serving");
@@ -22,6 +26,7 @@ export default function QueuePage() {
   const handleNext = async () => {
     if (!queueId || waitingEntries.length === 0) return;
     setAdvancing(true);
+    setAdvanceError(null);
     try {
       await advanceQueue(
         businessId!,
@@ -30,22 +35,20 @@ export default function QueuePage() {
         servingEntry?.id ?? null
       );
     } catch {
-      alert("Failed to advance queue. Please try again.");
+      setAdvanceError("Failed to advance queue. Please try again.");
     } finally {
       setAdvancing(false);
     }
   };
 
-  const handleSkip = (entryId: string) => {
-    if (confirm("Move this customer to skipped?")) {
-      skipEntry(businessId!, queueId!, entryId);
+  const handlePendingConfirm = () => {
+    if (!pendingAction || !queueId) return;
+    if (pendingAction.type === "skip") {
+      skipEntry(businessId!, queueId, pendingAction.entryId);
+    } else {
+      removeEntry(businessId!, queueId, pendingAction.entryId);
     }
-  };
-
-  const handleRemove = (entryId: string) => {
-    if (confirm("Remove this customer from the queue?")) {
-      removeEntry(businessId!, queueId!, entryId);
-    }
+    setPendingAction(null);
   };
 
   const handleSaveNote = async () => {
@@ -78,6 +81,7 @@ export default function QueuePage() {
       >
         {advancing ? "Advancing..." : "Next →"}
       </button>
+      {advanceError && <div className="error-message" style={{ marginTop: "0.5rem" }}>{advanceError}</div>}
 
       {servingEntry && (
         <div className="staff-serving-banner">
@@ -99,8 +103,8 @@ export default function QueuePage() {
               <div className="staff-entry-notes">Note: {entry.notes}</div>
             )}
             <div className="staff-entry-actions">
-              <button onClick={() => handleSkip(entry.id)}>Skip</button>
-              <button onClick={() => handleRemove(entry.id)}>Remove</button>
+              <button onClick={() => setPendingAction({ type: "skip", entryId: entry.id, label: entry.displayNumber })}>Skip</button>
+              <button onClick={() => setPendingAction({ type: "remove", entryId: entry.id, label: entry.displayNumber })}>Remove</button>
               <button
                 onClick={() => {
                   setNoteText(entry.notes ?? "");
@@ -133,6 +137,27 @@ export default function QueuePage() {
               </button>
               <button className="btn-primary" onClick={handleSaveNote}>
                 Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {pendingAction && (
+        <div className="staff-modal-overlay">
+          <div className="staff-modal">
+            <h3>{pendingAction.type === "skip" ? "Skip customer?" : "Remove customer?"}</h3>
+            <p style={{ margin: "0.75rem 0" }}>
+              {pendingAction.type === "skip"
+                ? `Move #${pendingAction.label} to skipped?`
+                : `Remove #${pendingAction.label} from the queue?`}
+            </p>
+            <div className="staff-modal-buttons">
+              <button className="btn-secondary" onClick={() => setPendingAction(null)}>
+                Cancel
+              </button>
+              <button className="btn-primary" onClick={handlePendingConfirm}>
+                {pendingAction.type === "skip" ? "Skip" : "Remove"}
               </button>
             </div>
           </div>
