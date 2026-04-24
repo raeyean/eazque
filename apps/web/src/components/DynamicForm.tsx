@@ -1,6 +1,11 @@
 import { useState, type FormEvent } from "react";
 import type { FormField } from "@eazque/shared";
 
+function isFieldEmpty(field: FormField, value: string | number | boolean | undefined): boolean {
+  if (field.type === "checkbox") return false; // boolean always has a value
+  return value === undefined || value === "";
+}
+
 interface DynamicFormProps {
   fields: FormField[];
   primaryColor: string;
@@ -23,6 +28,7 @@ export default function DynamicForm({
   const [formData, setFormData] = useState<
     Record<string, string | number | boolean>
   >({});
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const handleFieldChange = (
     fieldId: string,
@@ -33,6 +39,13 @@ export default function DynamicForm({
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
+    setValidationError(null);
+    for (const field of fields) {
+      if (field.required && isFieldEmpty(field, formData[field.id])) {
+        setValidationError(`${field.label} is required.`);
+        return;
+      }
+    }
     onSubmit({ customerName, phone, formData });
   };
 
@@ -73,6 +86,10 @@ export default function DynamicForm({
           )}
         </div>
       ))}
+
+      {validationError && (
+        <div className="form-field-error" role="alert">{validationError}</div>
+      )}
 
       <button
         type="submit"

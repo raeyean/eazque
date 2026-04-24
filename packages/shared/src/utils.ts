@@ -1,5 +1,9 @@
 import { DATA_DRIVEN_THRESHOLD } from "./constants";
 
+export function localDateString(date: Date = new Date()): string {
+  return new Intl.DateTimeFormat("en-CA").format(date);
+}
+
 export function formatDisplayNumber(num: number): string {
   const padded = num.toString().padStart(3, "0");
   return `Q-${padded}`;

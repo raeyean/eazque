@@ -30,7 +30,8 @@ export default function SettingsPage() {
   const [name, setName] = useState("");
   const [primaryColor, setPrimaryColor] = useState("");
   const [whatsappNumber, setWhatsappNumber] = useState("");
-  const [whatsappApiKey, setWhatsappApiKey] = useState("");
+  const [whatsappApiKeyIsSet, setWhatsappApiKeyIsSet] = useState(false);
+  const [newWhatsappApiKey, setNewWhatsappApiKey] = useState("");
   const [estimatedTime, setEstimatedTime] = useState("");
   const [threshold, setThreshold] = useState("");
   const [formFields, setFormFields] = useState<FormField[]>([]);
@@ -57,7 +58,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (secrets) {
-      setWhatsappApiKey(secrets.whatsappApiKey ?? "");
+      setWhatsappApiKeyIsSet(!!secrets.whatsappApiKey);
     }
   }, [secrets]);
 
@@ -95,11 +96,15 @@ export default function SettingsPage() {
         name: name.trim(),
         primaryColor: primaryColor.trim(),
         whatsappNumber: whatsappNumber.trim(),
-        whatsappApiKey: whatsappApiKey.trim(),
+        ...(newWhatsappApiKey.trim() ? { whatsappApiKey: newWhatsappApiKey.trim() } : {}),
         defaultEstimatedTimePerCustomer: parsedTime,
         approachingThreshold: parsedThreshold,
         formFields,
       });
+      if (newWhatsappApiKey.trim()) {
+        setWhatsappApiKeyIsSet(true);
+        setNewWhatsappApiKey("");
+      }
       setDirty(false);
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
@@ -161,8 +166,17 @@ export default function SettingsPage() {
           <input id="whatsapp-number" value={whatsappNumber} onChange={(e) => { setWhatsappNumber(e.target.value); setDirty(true); }} />
         </div>
         <div>
-          <label htmlFor="whatsapp-key">WhatsApp API Key</label>
-          <input id="whatsapp-key" type="password" value={whatsappApiKey} onChange={(e) => { setWhatsappApiKey(e.target.value); setDirty(true); }} />
+          <label htmlFor="whatsapp-key">
+            WhatsApp API Key{whatsappApiKeyIsSet && <span style={{ color: "#4caf50", marginLeft: "0.4rem", fontSize: "0.8rem" }}>(set)</span>}
+          </label>
+          <input
+            id="whatsapp-key"
+            type="password"
+            value={newWhatsappApiKey}
+            onChange={(e) => { setNewWhatsappApiKey(e.target.value); setDirty(true); }}
+            placeholder={whatsappApiKeyIsSet ? "Enter new key to replace existing" : "Enter API key"}
+            autoComplete="new-password"
+          />
         </div>
       </div>
 

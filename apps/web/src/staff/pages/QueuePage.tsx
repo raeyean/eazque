@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useStaffAuth } from "../StaffAuthContext";
 import { useQueue } from "../hooks/useQueue";
 import { useQueueEntries } from "../hooks/useQueueEntries";
+import { useBusinessSettings } from "../hooks/useBusinessSettings";
 import { advanceQueue, skipEntry, removeEntry, addNote, setQueueStatus } from "../services/queueActions";
 import { formatDisplayNumber } from "@eazque/shared";
 
@@ -10,6 +11,7 @@ type PendingAction = { type: "skip" | "remove"; entryId: string; label: string }
 export default function QueuePage() {
   const { businessId } = useStaffAuth();
   const { queue, queueId, loading: queueLoading } = useQueue(businessId!);
+  const { business } = useBusinessSettings(businessId!);
   const { entries, loading: entriesLoading } = useQueueEntries(
     businessId!,
     queueId
@@ -136,6 +138,11 @@ export default function QueuePage() {
       )}
 
       <div className="staff-entry-list">
+        {waitingEntries.length === 0 && (
+          <div style={{ textAlign: "center", color: "#8b6f47", padding: "2rem 0", fontStyle: "italic" }}>
+            No customers in the queue
+          </div>
+        )}
         {waitingEntries.map((entry) => (
           <div key={entry.id} className="staff-entry-card">
             <div className="staff-entry-header">
@@ -145,6 +152,16 @@ export default function QueuePage() {
             {entry.phone && (
               <div className="staff-entry-phone">{entry.phone}</div>
             )}
+            {business?.formFields?.map((field) => {
+              const val = entry.formData[field.id];
+              if (val === undefined || val === "") return null;
+              return (
+                <div key={field.id} className="staff-entry-form-data">
+                  <span className="staff-entry-form-label">{field.label}:</span>{" "}
+                  {String(val)}
+                </div>
+              );
+            })}
             {entry.notes && (
               <div className="staff-entry-notes">Note: {entry.notes}</div>
             )}

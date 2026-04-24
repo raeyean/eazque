@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../../firebase";
 import type { QueueEntry, DailyStats } from "@eazque/shared";
+import { localDateString } from "@eazque/shared";
 import { useQueueByDate } from "./useQueueByDate";
 
 function getToday(): string {
-  return new Date().toISOString().split("T")[0];
+  return localDateString();
 }
 
 function computeStats(date: string, entries: QueueEntry[]): DailyStats {

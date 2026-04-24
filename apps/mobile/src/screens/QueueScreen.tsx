@@ -159,6 +159,7 @@ export default function QueueScreen() {
         )}
         <EntryList
           entries={waitingEntries}
+          formFields={business?.formFields}
           onSkip={handleSkip}
           onRemove={handleRemove}
           onAddNote={(id) => {

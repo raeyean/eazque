@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { collection, query, where, limit, onSnapshot } from "firebase/firestore";
 import { db } from "../config/firebase";
 import type { Queue } from "@eazque/shared";
+import { localDateString } from "@eazque/shared";
 
 export function useQueue(businessId: string) {
   const [queue, setQueue] = useState<Queue | null>(null);
@@ -9,7 +10,7 @@ export function useQueue(businessId: string) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const today = new Date().toISOString().split("T")[0];
+    const today = localDateString();
     const q = query(
       collection(db, `businesses/${businessId}/queues`),
       where("date", "==", today),

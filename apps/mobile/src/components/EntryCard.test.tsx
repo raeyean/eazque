@@ -67,4 +67,33 @@ describe("EntryCard", () => {
     expect(screen.getByText("Remove")).toBeTruthy();
     expect(screen.getByText("Note")).toBeTruthy();
   });
+
+  it("renders form data with field labels when formFields provided", () => {
+    const formFields = [
+      { id: "f1", type: "text" as const, label: "Service", required: false },
+      { id: "f2", type: "text" as const, label: "Allergies", required: false },
+    ];
+    const entryWithFormData = { ...mockEntry, formData: { f1: "Haircut", f2: "" } };
+    render(
+      <EntryCard
+        entry={entryWithFormData}
+        formFields={formFields}
+        onSkip={noop}
+        onRemove={noop}
+        onAddNote={noop}
+      />
+    );
+    expect(screen.getByText(/Service: Haircut/)).toBeTruthy();
+    // empty value should not render
+    expect(screen.queryByText(/Allergies/)).toBeNull();
+  });
+
+  it("renders nothing for formData when no formFields provided", () => {
+    const entryWithFormData = { ...mockEntry, formData: { f1: "Haircut" } };
+    const { toJSON } = render(
+      <EntryCard entry={entryWithFormData} onSkip={noop} onRemove={noop} onAddNote={noop} />
+    );
+    const json = JSON.stringify(toJSON());
+    expect(json).not.toContain("Haircut");
+  });
 });

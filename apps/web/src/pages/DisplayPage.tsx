@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useBusinessData } from "../hooks/useBusinessData";
 import { useActiveQueue } from "../hooks/useActiveQueue";
-import { formatDisplayNumber } from "@eazque/shared";
+import { formatDisplayNumber, PRIMARY_COLOR_DEFAULT, estimateWaitMinutes, DEFAULT_ESTIMATED_TIME_PER_CUSTOMER } from "@eazque/shared";
 
 export default function DisplayPage() {
   const { businessId } = useParams<{ businessId: string }>();
@@ -16,7 +16,7 @@ export default function DisplayPage() {
     return <div style={styles.root}><span style={styles.label}>Business not found</span></div>;
   }
 
-  const primary = business.primaryColor || "#B8926A";
+  const primary = business.primaryColor || PRIMARY_COLOR_DEFAULT;
 
   if (!queue) {
     return (
@@ -40,6 +40,14 @@ export default function DisplayPage() {
     );
   }
 
+  const waitingCount = Math.max(0, queue.nextNumber - queue.currentNumber - 1);
+  const avgPerCustomer = estimateWaitMinutes({
+    positionInQueue: 1,
+    avgServiceTime: queue.avgServiceTime,
+    completedCount: queue.completedCount,
+    defaultEstimatedTime: business.defaultEstimatedTimePerCustomer ?? DEFAULT_ESTIMATED_TIME_PER_CUSTOMER,
+  });
+
   return (
     <div style={{ ...styles.root, borderTop: `8px solid ${primary}` }}>
       <BusinessHeader business={business} primary={primary} />
@@ -47,9 +55,8 @@ export default function DisplayPage() {
       <div style={{ ...styles.number, color: primary }}>
         {formatDisplayNumber(queue.currentNumber)}
       </div>
-      <div style={styles.waiting}>
-        {Math.max(0, queue.nextNumber - queue.currentNumber - 1)} waiting
-      </div>
+      <div style={styles.waiting}>{waitingCount} waiting</div>
+      <div style={styles.avgWait}>~{avgPerCustomer} min avg per customer</div>
     </div>
   );
 }
@@ -136,6 +143,11 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: "clamp(1rem, 2.5vw, 1.75rem)",
     color: "#a08060",
     marginTop: "0.5rem",
+  },
+  avgWait: {
+    fontSize: "clamp(0.85rem, 2vw, 1.25rem)",
+    color: "#7a6050",
+    marginTop: "0.25rem",
   },
   label: {
     fontSize: "clamp(1rem, 2.5vw, 1.75rem)",

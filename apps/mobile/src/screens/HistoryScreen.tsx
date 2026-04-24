@@ -6,15 +6,16 @@ import { useQueueByDate } from "../hooks/useQueueByDate";
 import { useHistoryEntries } from "../hooks/useHistoryEntries";
 import HistoryEntryList from "../components/HistoryEntryList";
 import { colors, common } from "../theme";
+import { localDateString } from "@eazque/shared";
 
 function getToday(): string {
-  return new Date().toISOString().split("T")[0];
+  return localDateString();
 }
 
 function shiftDate(dateStr: string, days: number): string {
   const d = new Date(dateStr + "T00:00:00");
   d.setDate(d.getDate() + days);
-  return d.toISOString().split("T")[0];
+  return localDateString(d);
 }
 
 function formatDateLabel(dateStr: string): string {

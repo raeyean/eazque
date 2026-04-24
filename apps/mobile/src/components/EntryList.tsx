@@ -1,10 +1,11 @@
 import { FlatList, View, Text, StyleSheet } from "react-native";
-import type { QueueEntry } from "@eazque/shared";
+import type { QueueEntry, FormField } from "@eazque/shared";
 import EntryCard from "./EntryCard";
 import { colors } from "../theme";
 
 interface EntryListProps {
   entries: QueueEntry[];
+  formFields?: FormField[];
   onSkip: (entryId: string) => void;
   onRemove: (entryId: string) => void;
   onAddNote: (entryId: string) => void;
@@ -12,6 +13,7 @@ interface EntryListProps {
 
 export default function EntryList({
   entries,
+  formFields,
   onSkip,
   onRemove,
   onAddNote,
@@ -31,6 +33,7 @@ export default function EntryList({
       renderItem={({ item }) => (
         <EntryCard
           entry={item}
+          formFields={formFields}
           onSkip={onSkip}
           onRemove={onRemove}
           onAddNote={onAddNote}

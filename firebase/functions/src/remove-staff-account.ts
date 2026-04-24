@@ -22,6 +22,10 @@ export const removeStaffAccount = onCall({ cors: true, invoker: "public" }, asyn
     throw new HttpsError("invalid-argument", "staffId is required");
   }
 
+  if (staffId === request.auth.uid) {
+    throw new HttpsError("invalid-argument", "Cannot remove yourself from the business");
+  }
+
   try {
     await getAuth().deleteUser(staffId);
   } catch {

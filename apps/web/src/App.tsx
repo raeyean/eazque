@@ -5,6 +5,7 @@ import QueueStatusPage from "./pages/QueueStatusPage";
 import DisplayPage from "./pages/DisplayPage";
 import { StaffAuthProvider } from "./staff/StaffAuthContext";
 import StaffRoute from "./staff/StaffRoute";
+import OwnerRoute from "./staff/OwnerRoute";
 import StaffLayout from "./staff/StaffLayout";
 import LoginPage from "./staff/pages/LoginPage";
 import SignUpPage from "./staff/pages/SignUpPage";
@@ -38,8 +39,10 @@ export default function App() {
               <Route path="/staff/queue" element={<QueuePage />} />
               <Route path="/staff/history" element={<HistoryPage />} />
               <Route path="/staff/analytics" element={<AnalyticsPage />} />
-              <Route path="/staff/settings" element={<SettingsPage />} />
-              <Route path="/staff/staff" element={<StaffPage />} />
+              <Route element={<OwnerRoute />}>
+                <Route path="/staff/settings" element={<SettingsPage />} />
+                <Route path="/staff/staff" element={<StaffPage />} />
+              </Route>
             </Suspense>
             <Route
               path="/staff"

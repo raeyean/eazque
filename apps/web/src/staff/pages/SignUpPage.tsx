@@ -42,7 +42,7 @@ export default function SignUpPage() {
           password,
           ownerName,
           businessName,
-          whatsappNumber: whatsappNumber || undefined,
+          whatsappNumber,
           estimatedTime: Number(estimatedTime) || undefined,
           approachingThreshold: Number(approachingThreshold) || undefined,
           primaryColor,
