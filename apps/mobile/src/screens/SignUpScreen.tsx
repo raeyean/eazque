@@ -24,12 +24,28 @@ export default function SignUpScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(false);
 
   const handleSignUp = async () => {
+    const trimmedEmail = email.trim();
+    const trimmedBusiness = businessName.trim();
+    const trimmedOwner = ownerName.trim();
+
+    if (!trimmedBusiness) return setError("Business name is required.");
+    if (!trimmedOwner) return setError("Your name is required.");
+    if (!trimmedEmail || !trimmedEmail.includes("@")) return setError("Valid email is required.");
+    if (password.length < 6) return setError("Password must be at least 6 characters.");
+
     setError(null);
     setLoading(true);
     try {
-      await signUp(email.trim(), password, businessName.trim(), ownerName.trim());
+      await signUp(trimmedEmail, password, trimmedBusiness, trimmedOwner);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Sign up failed");
+      const msg = err instanceof Error ? err.message : "";
+      if (msg.includes("already-exists") || msg.includes("email-already")) {
+        setError("Email already registered. Try signing in.");
+      } else if (msg.includes("invalid-argument")) {
+        setError("Invalid input. Check your details and try again.");
+      } else {
+        setError("Sign up failed. Please try again.");
+      }
       setLoading(false);
     }
   };
@@ -81,9 +97,9 @@ export default function SignUpScreen({ navigation }: Props) {
         />
 
         <Pressable
-          style={[common.button, loading && common.buttonDisabled]}
+          style={[common.button, (loading || !email || !password || !businessName || !ownerName) && common.buttonDisabled]}
           onPress={handleSignUp}
-          disabled={loading}
+          disabled={loading || !email || !password || !businessName || !ownerName}
         >
           <Text style={common.buttonText}>
             {loading ? "Creating..." : "Create Business"}

@@ -16,13 +16,20 @@ export function useBusinessSettings(businessId: string) {
       if (businessLoaded && secretsLoaded) setLoading(false);
     };
 
-    const unsubBusiness = onSnapshot(doc(db, "businesses", businessId), (snap) => {
-      if (snap.exists()) {
-        setBusiness({ id: snap.id, ...snap.data() } as Business);
+    const unsubBusiness = onSnapshot(
+      doc(db, "businesses", businessId),
+      (snap) => {
+        if (snap.exists()) {
+          setBusiness({ id: snap.id, ...snap.data() } as Business);
+        }
+        businessLoaded = true;
+        checkDone();
+      },
+      () => {
+        businessLoaded = true;
+        checkDone();
       }
-      businessLoaded = true;
-      checkDone();
-    });
+    );
 
     const unsubSecrets = onSnapshot(
       doc(db, "businesses", businessId, "secrets", "whatsapp"),
@@ -30,6 +37,10 @@ export function useBusinessSettings(businessId: string) {
         if (snap.exists()) {
           setSecrets(snap.data() as BusinessSecrets);
         }
+        secretsLoaded = true;
+        checkDone();
+      },
+      () => {
         secretsLoaded = true;
         checkDone();
       }

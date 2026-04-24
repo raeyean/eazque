@@ -82,3 +82,11 @@ export async function addNote(
     notes: note,
   });
 }
+
+export async function setQueueStatus(
+  businessId: string,
+  queueId: string,
+  status: "active" | "paused"
+) {
+  await updateDoc(queueRef(businessId, queueId), { status });
+}

@@ -1,10 +1,11 @@
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
-import type { QueueEntry } from "@eazque/shared";
+import type { QueueEntry, FormField } from "@eazque/shared";
 import { colors } from "../theme";
 
 interface EntryCardProps {
   entry: QueueEntry;
+  formFields?: FormField[];
   onSkip: (entryId: string) => void;
   onRemove: (entryId: string) => void;
   onAddNote: (entryId: string) => void;
@@ -22,6 +23,7 @@ function formatTimeAgo(date: Date): string {
 
 export default function EntryCard({
   entry,
+  formFields,
   onSkip,
   onRemove,
   onAddNote,
@@ -60,6 +62,16 @@ export default function EntryCard({
         {entry.notes ? (
           <Text style={styles.notes}>{entry.notes}</Text>
         ) : null}
+        {formFields && formFields.length > 0 &&
+          formFields.map((field) => {
+            const val = entry.formData[field.id];
+            if (val === undefined || val === "") return null;
+            return (
+              <Text key={field.id} style={styles.formDataRow}>
+                {field.label}: {String(val)}
+              </Text>
+            );
+          })}
       </View>
     </Swipeable>
   );
@@ -99,6 +111,12 @@ const styles = StyleSheet.create({
     marginTop: 4,
     marginLeft: 68,
     fontStyle: "italic",
+  },
+  formDataRow: {
+    fontSize: 12,
+    color: colors.secondary,
+    marginTop: 2,
+    marginLeft: 68,
   },
   actions: {
     flexDirection: "row",

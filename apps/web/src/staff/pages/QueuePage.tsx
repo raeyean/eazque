@@ -2,19 +2,36 @@ import { useState } from "react";
 import { useStaffAuth } from "../StaffAuthContext";
 import { useQueue } from "../hooks/useQueue";
 import { useQueueEntries } from "../hooks/useQueueEntries";
-import { advanceQueue, skipEntry, removeEntry, addNote } from "../services/queueActions";
+import { useBusinessSettings } from "../hooks/useBusinessSettings";
+import { advanceQueue, skipEntry, removeEntry, addNote, setQueueStatus } from "../services/queueActions";
 import { formatDisplayNumber } from "@eazque/shared";
+
+type PendingAction = { type: "skip" | "remove"; entryId: string; label: string };
 
 export default function QueuePage() {
   const { businessId } = useStaffAuth();
   const { queue, queueId, loading: queueLoading } = useQueue(businessId!);
+  const { business } = useBusinessSettings(businessId!);
   const { entries, loading: entriesLoading } = useQueueEntries(
     businessId!,
     queueId
   );
   const [advancing, setAdvancing] = useState(false);
+  const [advanceError, setAdvanceError] = useState<string | null>(null);
+  const [toggling, setToggling] = useState(false);
+
+  const handleTogglePause = async () => {
+    if (!queueId) return;
+    setToggling(true);
+    try {
+      await setQueueStatus(businessId!, queueId, queue!.status === "active" ? "paused" : "active");
+    } finally {
+      setToggling(false);
+    }
+  };
   const [noteEntryId, setNoteEntryId] = useState<string | null>(null);
   const [noteText, setNoteText] = useState("");
+  const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
 
   const waitingEntries = entries.filter((e) => e.status === "waiting");
   const servingEntry = entries.find((e) => e.status === "serving");
@@ -22,6 +39,7 @@ export default function QueuePage() {
   const handleNext = async () => {
     if (!queueId || waitingEntries.length === 0) return;
     setAdvancing(true);
+    setAdvanceError(null);
     try {
       await advanceQueue(
         businessId!,
@@ -30,22 +48,20 @@ export default function QueuePage() {
         servingEntry?.id ?? null
       );
     } catch {
-      alert("Failed to advance queue. Please try again.");
+      setAdvanceError("Failed to advance queue. Please try again.");
     } finally {
       setAdvancing(false);
     }
   };
 
-  const handleSkip = (entryId: string) => {
-    if (confirm("Move this customer to skipped?")) {
-      skipEntry(businessId!, queueId!, entryId);
+  const handlePendingConfirm = () => {
+    if (!pendingAction || !queueId) return;
+    if (pendingAction.type === "skip") {
+      skipEntry(businessId!, queueId, pendingAction.entryId);
+    } else {
+      removeEntry(businessId!, queueId, pendingAction.entryId);
     }
-  };
-
-  const handleRemove = (entryId: string) => {
-    if (confirm("Remove this customer from the queue?")) {
-      removeEntry(businessId!, queueId!, entryId);
-    }
+    setPendingAction(null);
   };
 
   const handleSaveNote = async () => {
@@ -62,11 +78,22 @@ export default function QueuePage() {
 
   return (
     <div className="staff-page">
-      <div className="staff-now-serving">
-        <span className="staff-now-serving-label">Now serving</span>
-        <span className="staff-now-serving-number">
-          {formatDisplayNumber(queue.currentNumber)}
-        </span>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.25rem" }}>
+        <div className="staff-now-serving" style={{ marginBottom: 0 }}>
+          <span className="staff-now-serving-label">Now serving</span>
+          <span className="staff-now-serving-number">
+            {formatDisplayNumber(queue.currentNumber)}
+          </span>
+        </div>
+        <a
+          href={`/display/${businessId}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ fontSize: "0.8rem", color: "#b8926a", textDecoration: "none", whiteSpace: "nowrap" }}
+          title="Open public display for TV/kiosk"
+        >
+          ⬡ Display ↗
+        </a>
       </div>
       <div className="staff-queue-stats">
         {waitingEntries.length} waiting
@@ -78,6 +105,31 @@ export default function QueuePage() {
       >
         {advancing ? "Advancing..." : "Next →"}
       </button>
+      {advanceError && <div className="error-message" style={{ marginTop: "0.5rem" }}>{advanceError}</div>}
+
+      <button
+        onClick={handleTogglePause}
+        disabled={toggling}
+        style={{
+          background: "none",
+          border: `1px solid ${queue.status === "paused" ? "#4caf50" : "#f0a500"}`,
+          color: queue.status === "paused" ? "#4caf50" : "#f0a500",
+          padding: "0.4rem 1.25rem",
+          borderRadius: 8,
+          cursor: "pointer",
+          fontSize: "0.9rem",
+          fontWeight: 600,
+          marginTop: "0.5rem",
+        }}
+      >
+        {toggling ? "..." : queue.status === "paused" ? "▶ Resume Queue" : "⏸ Pause Queue"}
+      </button>
+
+      {queue.status === "paused" && (
+        <div style={{ background: "#fff8e1", border: "1px solid #f0a500", borderRadius: 8, padding: "0.6rem 1rem", fontSize: "0.85rem", color: "#7a5800", marginTop: "0.25rem" }}>
+          Queue is paused — customers cannot join until resumed.
+        </div>
+      )}
 
       {servingEntry && (
         <div className="staff-serving-banner">
@@ -86,6 +138,11 @@ export default function QueuePage() {
       )}
 
       <div className="staff-entry-list">
+        {waitingEntries.length === 0 && (
+          <div style={{ textAlign: "center", color: "#8b6f47", padding: "2rem 0", fontStyle: "italic" }}>
+            No customers in the queue
+          </div>
+        )}
         {waitingEntries.map((entry) => (
           <div key={entry.id} className="staff-entry-card">
             <div className="staff-entry-header">
@@ -95,12 +152,22 @@ export default function QueuePage() {
             {entry.phone && (
               <div className="staff-entry-phone">{entry.phone}</div>
             )}
+            {business?.formFields?.map((field) => {
+              const val = entry.formData[field.id];
+              if (val === undefined || val === "") return null;
+              return (
+                <div key={field.id} className="staff-entry-form-data">
+                  <span className="staff-entry-form-label">{field.label}:</span>{" "}
+                  {String(val)}
+                </div>
+              );
+            })}
             {entry.notes && (
               <div className="staff-entry-notes">Note: {entry.notes}</div>
             )}
             <div className="staff-entry-actions">
-              <button onClick={() => handleSkip(entry.id)}>Skip</button>
-              <button onClick={() => handleRemove(entry.id)}>Remove</button>
+              <button onClick={() => setPendingAction({ type: "skip", entryId: entry.id, label: entry.displayNumber })}>Skip</button>
+              <button onClick={() => setPendingAction({ type: "remove", entryId: entry.id, label: entry.displayNumber })}>Remove</button>
               <button
                 onClick={() => {
                   setNoteText(entry.notes ?? "");
@@ -133,6 +200,27 @@ export default function QueuePage() {
               </button>
               <button className="btn-primary" onClick={handleSaveNote}>
                 Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {pendingAction && (
+        <div className="staff-modal-overlay">
+          <div className="staff-modal">
+            <h3>{pendingAction.type === "skip" ? "Skip customer?" : "Remove customer?"}</h3>
+            <p style={{ margin: "0.75rem 0" }}>
+              {pendingAction.type === "skip"
+                ? `Move #${pendingAction.label} to skipped?`
+                : `Remove #${pendingAction.label} from the queue?`}
+            </p>
+            <div className="staff-modal-buttons">
+              <button className="btn-secondary" onClick={() => setPendingAction(null)}>
+                Cancel
+              </button>
+              <button className="btn-primary" onClick={handlePendingConfirm}>
+                {pendingAction.type === "skip" ? "Skip" : "Remove"}
               </button>
             </div>
           </div>

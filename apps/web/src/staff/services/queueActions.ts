@@ -1,4 +1,4 @@
-import { doc, writeBatch, serverTimestamp, updateDoc } from "firebase/firestore";
+import { doc, runTransaction, serverTimestamp, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase";
 import type { QueueEntry } from "@eazque/shared";
 
@@ -17,23 +17,30 @@ export async function advanceQueue(
   servingEntryId: string | null
 ) {
   if (waitingEntries.length === 0) return;
-  const batch = writeBatch(db);
   const nextEntry = waitingEntries[0];
 
-  if (servingEntryId) {
-    batch.update(entryRef(businessId, queueId, servingEntryId), {
-      status: "completed",
-      completedAt: serverTimestamp(),
+  await runTransaction(db, async (txn) => {
+    const nextSnap = await txn.get(entryRef(businessId, queueId, nextEntry.id));
+    if (!nextSnap.exists() || nextSnap.data()?.status !== "waiting") return;
+
+    if (servingEntryId) {
+      const servingSnap = await txn.get(entryRef(businessId, queueId, servingEntryId));
+      if (servingSnap.exists() && servingSnap.data()?.status === "serving") {
+        txn.update(entryRef(businessId, queueId, servingEntryId), {
+          status: "completed",
+          completedAt: serverTimestamp(),
+        });
+      }
+    }
+
+    txn.update(entryRef(businessId, queueId, nextEntry.id), {
+      status: "serving",
+      servedAt: serverTimestamp(),
     });
-  }
-  batch.update(entryRef(businessId, queueId, nextEntry.id), {
-    status: "serving",
-    servedAt: serverTimestamp(),
+    txn.update(queueRef(businessId, queueId), {
+      currentNumber: nextEntry.queueNumber,
+    });
   });
-  batch.update(queueRef(businessId, queueId), {
-    currentNumber: nextEntry.queueNumber,
-  });
-  await batch.commit();
 }
 
 export async function skipEntry(
@@ -59,4 +66,12 @@ export async function addNote(
   note: string
 ) {
   await updateDoc(entryRef(businessId, queueId, entryId), { notes: note });
+}
+
+export async function setQueueStatus(
+  businessId: string,
+  queueId: string,
+  status: "active" | "paused"
+) {
+  await updateDoc(queueRef(businessId, queueId), { status });
 }

@@ -1,4 +1,5 @@
 import { onDocumentUpdated } from "firebase-functions/v2/firestore";
+import { FieldValue } from "firebase-admin/firestore";
 import { db } from "./config";
 import { paths } from "./paths";
 import { findApproachingEntries } from "./queue-logic";
@@ -30,17 +31,22 @@ export const onCurrentNumberAdvance = onDocumentUpdated(
       .where("status", "==", "waiting")
       .get();
 
-    const waitingEntries = entriesSnap.docs.map((doc) => ({
-      queueNumber: doc.data().queueNumber as number,
-      phone: doc.data().phone as string,
-      displayNumber: doc.data().displayNumber as string,
-    }));
+    const waitingEntries = entriesSnap.docs
+      .filter((doc) => !doc.data().approachingNotifiedAt)
+      .map((doc) => ({
+        id: doc.id,
+        queueNumber: doc.data().queueNumber as number,
+        phone: doc.data().phone as string,
+        displayNumber: doc.data().displayNumber as string,
+      }));
 
     const approaching = findApproachingEntries(
       after.currentNumber,
       business?.approachingThreshold ?? 3,
       waitingEntries
     );
+
+    if (approaching.length === 0) return;
 
     await Promise.all(
       approaching.map((entry) =>
@@ -56,5 +62,13 @@ export const onCurrentNumberAdvance = onDocumentUpdated(
         })
       )
     );
+
+    const batch = db.batch();
+    for (const entry of approaching) {
+      batch.update(db.doc(paths.entry(businessId, queueId, entry.id)), {
+        approachingNotifiedAt: FieldValue.serverTimestamp(),
+      });
+    }
+    await batch.commit();
   }
 );

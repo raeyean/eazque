@@ -18,6 +18,7 @@ export function createQueueEntryData(
     sessionToken,
     servedAt: null,
     completedAt: null,
+    approachingNotifiedAt: null,
   };
 }
 

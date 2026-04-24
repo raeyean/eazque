@@ -40,21 +40,21 @@ export default function MainTabs() {
         name="Queue"
         component={QueueScreen}
         options={{
-          headerRight: isOwner
-            ? () => (
-                <Pressable
-                  onPress={() => navigation.navigate("Settings")}
-                  style={{ marginRight: 16 }}
-                  accessibilityLabel="Settings"
-                >
-                  <Ionicons
-                    name="settings-outline"
-                    size={24}
-                    color={colors.textDark}
-                  />
-                </Pressable>
-              )
-            : undefined,
+          headerRight: () => (
+            <Pressable
+              onPress={() =>
+                navigation.navigate(isOwner ? "Settings" : "QRCode")
+              }
+              style={{ marginRight: 16 }}
+              accessibilityLabel={isOwner ? "Settings" : "QR Code"}
+            >
+              <Ionicons
+                name={isOwner ? "settings-outline" : "qr-code-outline"}
+                size={24}
+                color={colors.textDark}
+              />
+            </Pressable>
+          ),
         }}
       />
       <Tab.Screen name="History" component={HistoryScreen} />

@@ -12,17 +12,18 @@ import { useStaffAuth } from "../StaffAuthContext";
 import { useTodayStats } from "../hooks/useTodayStats";
 import { useDateRangeStats } from "../hooks/useDateRangeStats";
 import type { DailyStats } from "@eazque/shared";
+import { localDateString } from "@eazque/shared";
 
 type RangeType = "today" | "7days" | "30days" | "custom";
 
 function getToday(): string {
-  return new Date().toISOString().split("T")[0];
+  return localDateString();
 }
 
 function shiftDate(dateStr: string, days: number): string {
   const d = new Date(dateStr + "T00:00:00");
   d.setDate(d.getDate() + days);
-  return d.toISOString().split("T")[0];
+  return localDateString(d);
 }
 
 function formatBarDate(dateStr: string): string {

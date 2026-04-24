@@ -2,23 +2,29 @@ import { onSchedule } from "firebase-functions/v2/scheduler";
 import { db } from "./config";
 import { buildQueueResetData } from "./queue-logic";
 
-export const dailyQueueReset = onSchedule("every day 00:00", async () => {
-  const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
-  const resetData = buildQueueResetData(today);
+const TIMEZONE = process.env.DAILY_RESET_TIMEZONE ?? "UTC";
 
-  const businessesSnap = await db.collection("businesses").get();
+export const dailyQueueReset = onSchedule(
+  { schedule: "every day 00:00", timeZone: TIMEZONE },
+  async () => {
+    // Use the same timezone for the date string so "today" matches the local midnight
+    const today = new Intl.DateTimeFormat("en-CA", { timeZone: TIMEZONE }).format(new Date());
+    const resetData = buildQueueResetData(today);
 
-  for (const businessDoc of businessesSnap.docs) {
-    const queuesSnap = await db
-      .collection(`businesses/${businessDoc.id}/queues`)
-      .get();
+    const businessesSnap = await db.collection("businesses").get();
 
-    if (queuesSnap.empty) continue;
+    for (const businessDoc of businessesSnap.docs) {
+      const queuesSnap = await db
+        .collection(`businesses/${businessDoc.id}/queues`)
+        .get();
 
-    const batch = db.batch();
-    for (const queueDoc of queuesSnap.docs) {
-      batch.update(queueDoc.ref, resetData);
+      if (queuesSnap.empty) continue;
+
+      const batch = db.batch();
+      for (const queueDoc of queuesSnap.docs) {
+        batch.update(queueDoc.ref, resetData);
+      }
+      await batch.commit();
     }
-    await batch.commit();
   }
-});
+);

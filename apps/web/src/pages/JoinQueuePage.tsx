@@ -87,8 +87,14 @@ export default function JoinQueuePage() {
         },
       });
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : "Failed to join queue";
+      const code = err && typeof err === "object" && "code" in err
+        ? (err as { code: string }).code
+        : "";
+      let message = "Something went wrong. Please try again.";
+      if (code === "functions/failed-precondition") message = "Queue is currently paused. Please try again later.";
+      else if (code === "functions/not-found") message = "Queue not found. Please scan the QR code again.";
+      else if (code === "functions/invalid-argument") message = "Please check your information and try again.";
+      else if (code === "functions/resource-exhausted") message = "Queue is full. Please try again later.";
       setError(message);
       setSubmitting(false);
     }

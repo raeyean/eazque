@@ -24,6 +24,7 @@ describe("StaffRoute", () => {
       loading: false,
       signIn: vi.fn(),
       signOut: vi.fn(),
+      signUp: vi.fn(),
     });
     render(<StaffRoute />);
     const nav = screen.getByTestId("navigate");
@@ -39,6 +40,7 @@ describe("StaffRoute", () => {
       loading: false,
       signIn: vi.fn(),
       signOut: vi.fn(),
+      signUp: vi.fn(),
     });
     render(<StaffRoute />);
     expect(screen.getByTestId("outlet")).toBeInTheDocument();
@@ -52,6 +54,7 @@ describe("StaffRoute", () => {
       loading: true,
       signIn: vi.fn(),
       signOut: vi.fn(),
+      signUp: vi.fn(),
     });
     const { container } = render(<StaffRoute />);
     expect(container).toBeEmptyDOMElement();

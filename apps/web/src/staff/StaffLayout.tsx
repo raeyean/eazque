@@ -2,22 +2,24 @@ import { NavLink, Outlet } from "react-router-dom";
 import { useStaffAuth } from "./StaffAuthContext";
 import "./staff.css";
 
-const NAV_ITEMS = [
-  { to: "/staff/queue", label: "Queue" },
-  { to: "/staff/history", label: "History" },
-  { to: "/staff/analytics", label: "Analytics" },
-  { to: "/staff/settings", label: "Settings" },
-  { to: "/staff/staff", label: "Staff" },
+const ALL_NAV_ITEMS = [
+  { to: "/staff/queue", label: "Queue", ownerOnly: false },
+  { to: "/staff/history", label: "History", ownerOnly: false },
+  { to: "/staff/analytics", label: "Analytics", ownerOnly: false },
+  { to: "/staff/settings", label: "Settings", ownerOnly: true },
+  { to: "/staff/staff", label: "Staff", ownerOnly: true },
 ];
 
 export default function StaffLayout() {
   const { staffProfile, signOut } = useStaffAuth();
+  const isOwner = staffProfile?.role === "owner";
+  const navItems = ALL_NAV_ITEMS.filter((item) => !item.ownerOnly || isOwner);
 
   return (
     <div className="staff-layout">
       <nav className="staff-sidebar">
         <div className="staff-sidebar-logo">Eazque</div>
-        {NAV_ITEMS.map(({ to, label }) => (
+        {navItems.map(({ to, label }) => (
           <NavLink
             key={to}
             to={to}
@@ -51,7 +53,7 @@ export default function StaffLayout() {
       </main>
 
       <nav className="staff-bottom-tabs">
-        {NAV_ITEMS.map(({ to, label }) => (
+        {navItems.map(({ to, label }) => (
           <NavLink
             key={to}
             to={to}

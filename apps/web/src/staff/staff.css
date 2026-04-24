@@ -156,6 +156,16 @@
   margin-bottom: 0.25rem;
 }
 
+.staff-entry-form-data {
+  font-size: 0.82rem;
+  color: #8b7355;
+  margin-bottom: 0.15rem;
+}
+
+.staff-entry-form-label {
+  font-weight: 600;
+}
+
 .staff-entry-actions {
   display: flex;
   gap: 0.5rem;

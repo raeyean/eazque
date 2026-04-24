@@ -30,7 +30,8 @@ export default function SettingsPage() {
   const [name, setName] = useState("");
   const [primaryColor, setPrimaryColor] = useState("");
   const [whatsappNumber, setWhatsappNumber] = useState("");
-  const [whatsappApiKey, setWhatsappApiKey] = useState("");
+  const [whatsappApiKeyIsSet, setWhatsappApiKeyIsSet] = useState(false);
+  const [newWhatsappApiKey, setNewWhatsappApiKey] = useState("");
   const [estimatedTime, setEstimatedTime] = useState("");
   const [threshold, setThreshold] = useState("");
   const [formFields, setFormFields] = useState<FormField[]>([]);
@@ -38,6 +39,9 @@ export default function SettingsPage() {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [logoError, setLogoError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
     if (business) {
@@ -54,7 +58,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (secrets) {
-      setWhatsappApiKey(secrets.whatsappApiKey ?? "");
+      setWhatsappApiKeyIsSet(!!secrets.whatsappApiKey);
     }
   }, [secrets]);
 
@@ -63,12 +67,13 @@ export default function SettingsPage() {
     if (!file) return;
     const previousUri = logoUri;
     setLogoUri(URL.createObjectURL(file));
+    setLogoError(null);
     setUploading(true);
     try {
       const url = await uploadBusinessLogo(businessId!, file);
       setLogoUri(url);
     } catch {
-      alert("Failed to upload logo. Please try again.");
+      setLogoError("Failed to upload logo. Please try again.");
       setLogoUri(previousUri);
     } finally {
       setUploading(false);
@@ -78,10 +83,12 @@ export default function SettingsPage() {
   const handleSave = async () => {
     const parsedTime = Number(estimatedTime);
     const parsedThreshold = Number(threshold);
-    if (!name.trim()) { alert("Business name is required."); return; }
-    if (isNaN(parsedTime) || parsedTime <= 0) { alert("Estimated time must be a positive number."); return; }
+    setFormError(null);
+    setSaveSuccess(false);
+    if (!name.trim()) { setFormError("Business name is required."); return; }
+    if (isNaN(parsedTime) || parsedTime <= 0) { setFormError("Estimated time must be a positive number."); return; }
     if (isNaN(parsedThreshold) || parsedThreshold < 1 || !Number.isInteger(parsedThreshold)) {
-      alert("Approaching threshold must be a positive whole number."); return;
+      setFormError("Approaching threshold must be a positive whole number."); return;
     }
     setSaving(true);
     try {
@@ -89,15 +96,20 @@ export default function SettingsPage() {
         name: name.trim(),
         primaryColor: primaryColor.trim(),
         whatsappNumber: whatsappNumber.trim(),
-        whatsappApiKey: whatsappApiKey.trim(),
+        ...(newWhatsappApiKey.trim() ? { whatsappApiKey: newWhatsappApiKey.trim() } : {}),
         defaultEstimatedTimePerCustomer: parsedTime,
         approachingThreshold: parsedThreshold,
         formFields,
       });
+      if (newWhatsappApiKey.trim()) {
+        setWhatsappApiKeyIsSet(true);
+        setNewWhatsappApiKey("");
+      }
       setDirty(false);
-      alert("Settings saved.");
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
     } catch {
-      alert("Failed to save settings. Please try again.");
+      setFormError("Failed to save settings. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -133,6 +145,7 @@ export default function SettingsPage() {
               disabled={uploading}
             />
           </label>
+          {logoError && <div className="error-message" style={{ marginTop: "0.5rem" }}>{logoError}</div>}
         </div>
       </div>
 
@@ -153,8 +166,17 @@ export default function SettingsPage() {
           <input id="whatsapp-number" value={whatsappNumber} onChange={(e) => { setWhatsappNumber(e.target.value); setDirty(true); }} />
         </div>
         <div>
-          <label htmlFor="whatsapp-key">WhatsApp API Key</label>
-          <input id="whatsapp-key" type="password" value={whatsappApiKey} onChange={(e) => { setWhatsappApiKey(e.target.value); setDirty(true); }} />
+          <label htmlFor="whatsapp-key">
+            WhatsApp API Key{whatsappApiKeyIsSet && <span style={{ color: "#4caf50", marginLeft: "0.4rem", fontSize: "0.8rem" }}>(set)</span>}
+          </label>
+          <input
+            id="whatsapp-key"
+            type="password"
+            value={newWhatsappApiKey}
+            onChange={(e) => { setNewWhatsappApiKey(e.target.value); setDirty(true); }}
+            placeholder={whatsappApiKeyIsSet ? "Enter new key to replace existing" : "Enter API key"}
+            autoComplete="new-password"
+          />
         </div>
       </div>
 
@@ -175,6 +197,9 @@ export default function SettingsPage() {
         formFields={formFields}
         onChange={(f) => { setFormFields(f); setDirty(true); }}
       />
+
+      {formError && <div className="error-message">{formError}</div>}
+      {saveSuccess && <div style={{ color: "#4caf50", fontWeight: 600, marginBottom: "0.5rem" }}>Settings saved.</div>}
 
       <button
         className="staff-btn"

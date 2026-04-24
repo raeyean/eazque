@@ -12,7 +12,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { colors, common } from "../theme";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
-type Props = NativeStackScreenProps<{ Login: undefined; SignUp: undefined }, "Login">;
+type Props = NativeStackScreenProps<{ Login: undefined; SignUp: undefined; ForgotPassword: undefined }, "Login">;
 
 export default function LoginScreen({ navigation }: Props) {
   const { signIn } = useAuth();
@@ -70,6 +70,15 @@ export default function LoginScreen({ navigation }: Props) {
         >
           <Text style={common.buttonText}>
             {loading ? "Logging in..." : "Log In"}
+          </Text>
+        </Pressable>
+
+        <Pressable
+          style={styles.linkButton}
+          onPress={() => navigation.navigate("ForgotPassword")}
+        >
+          <Text style={[styles.linkText, { color: colors.secondary, fontSize: 14 }]}>
+            Forgot password?
           </Text>
         </Pressable>
 
