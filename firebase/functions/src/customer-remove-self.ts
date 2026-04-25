@@ -6,6 +6,7 @@ import { paths } from "./paths";
 const schema = z.object({
   businessId: z.string().min(1),
   queueId: z.string().min(1),
+  entryId: z.string().min(1),
   sessionToken: z.string().uuid(),
 });
 
@@ -15,26 +16,30 @@ export const customerRemoveSelf = onCall({ cors: true, invoker: "public" }, asyn
     throw new HttpsError("invalid-argument", "Invalid request data");
   }
 
-  const { businessId, queueId, sessionToken } = parsed.data;
+  const { businessId, queueId, entryId, sessionToken } = parsed.data;
 
-  const snap = await db
-    .collection(paths.publicEntries(businessId, queueId))
-    .where("sessionToken", "==", sessionToken)
-    .limit(1)
-    .get();
+  // Read the private entry (admin SDK bypasses Firestore rules). The private
+  // `entries` collection is staff-only readable, so the token it holds cannot
+  // be harvested by an unauthenticated attacker.
+  const entryRef = db.doc(paths.entry(businessId, queueId, entryId));
+  const entrySnap = await entryRef.get();
 
-  if (snap.empty) {
+  if (!entrySnap.exists) {
     throw new HttpsError("not-found", "Queue entry not found");
   }
 
-  const publicEntryDoc = snap.docs[0];
-  if (publicEntryDoc.data().status !== "waiting") {
+  const entry = entrySnap.data()!;
+  if (entry.sessionToken !== sessionToken) {
+    // Do not leak whether the entry exists vs. the token mismatched.
+    throw new HttpsError("not-found", "Queue entry not found");
+  }
+
+  if (entry.status !== "waiting") {
     throw new HttpsError("failed-precondition", "Entry cannot be removed in its current state");
   }
 
-  const entryId = publicEntryDoc.id;
   const batch = db.batch();
-  batch.update(db.doc(paths.entry(businessId, queueId, entryId)), { status: "removed" });
+  batch.update(entryRef, { status: "removed" });
   batch.update(db.doc(paths.publicEntry(businessId, queueId, entryId)), { status: "removed" });
   await batch.commit();
 

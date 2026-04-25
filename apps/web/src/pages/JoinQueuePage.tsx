@@ -78,14 +78,17 @@ export default function JoinQueuePage() {
         queueId,
         ...data,
       });
-      navigate(`/q/${businessId}/status/${result.data.sessionToken}`, {
-        state: {
-          ...result.data,
-          businessName: business.name,
-          whatsappNumber: business.whatsappNumber,
-          primaryColor: business.primaryColor,
-        },
-      });
+      navigate(
+        `/q/${businessId}/status/${result.data.entryId}/${result.data.sessionToken}`,
+        {
+          state: {
+            ...result.data,
+            businessName: business.name,
+            whatsappNumber: business.whatsappNumber,
+            primaryColor: business.primaryColor,
+          },
+        }
+      );
     } catch (err: unknown) {
       const code = err && typeof err === "object" && "code" in err
         ? (err as { code: string }).code

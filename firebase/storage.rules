@@ -1,0 +1,38 @@
+rules_version = '2';
+
+// Storage rules deliberately match the Firestore security model:
+// - Logos are publicly readable (used by anonymous customer pages).
+// - Logos may only be written by the business owner whose UID matches the
+//   {businessId} path segment. Staff (non-owner) cannot overwrite logos.
+// - Uploads are size- and content-type-capped to limit abuse.
+// Everything else under the bucket is denied.
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    function isOwnerOfBusiness(businessId) {
+      return isAuth() &&
+        firestore.get(
+          /databases/ezque-dev-db/documents/businesses/$(businessId)/staff/$(request.auth.uid)
+        ).data.role == "owner";
+    }
+
+    function isImageUnder(maxBytes) {
+      return request.resource != null
+        && request.resource.size < maxBytes
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    match /logos/{businessId} {
+      allow read: if true;
+      allow write: if isOwnerOfBusiness(businessId) && isImageUnder(2 * 1024 * 1024);
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
