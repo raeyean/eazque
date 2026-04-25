@@ -21,6 +21,7 @@ export function useBusinessData(businessId: string) {
             primaryColor: data.primaryColor,
             whatsappNumber: data.whatsappNumber,
             formFields: data.formFields ?? [],
+            defaultEstimatedTimePerCustomer: data.defaultEstimatedTimePerCustomer,
           });
         } else {
           setError("Business not found");

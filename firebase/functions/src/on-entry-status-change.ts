@@ -1,5 +1,5 @@
 import { onDocumentUpdated } from "firebase-functions/v2/firestore";
-import { logger } from "firebase-functions/logger";
+import * as logger from "firebase-functions/logger";
 import { db } from "./config";
 import { paths } from "./paths";
 import { calculateNewAverage } from "./queue-logic";

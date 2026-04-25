@@ -21,7 +21,11 @@ const mocks = vi.hoisted(() => {
 vi.mock("firebase-admin/auth", () => ({ getAuth: mocks.mockGetAuth }));
 vi.mock("../src/config", () => ({ db: mocks.mockDb }));
 vi.mock("firebase-functions/logger", () => ({
-  logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+  log: vi.fn(),
 }));
 
 import { removeStaffAccount } from "../src/remove-staff-account";

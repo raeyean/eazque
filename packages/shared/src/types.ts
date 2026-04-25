@@ -35,6 +35,7 @@ export interface BusinessPublic {
   primaryColor: string;
   whatsappNumber: string;
   formFields: FormField[];
+  defaultEstimatedTimePerCustomer?: number;
 }
 
 export interface Staff {
