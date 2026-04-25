@@ -26,10 +26,11 @@ service cloud.firestore {
       allow update: if isBusinessOwner(businessId);
       allow delete: if false;
 
-      // Secrets subcollection — WhatsApp API credentials, owner-only
+      // Secrets subcollection — WhatsApp API credentials, owner-only.
+      // Owner can write directly so SettingsPage can save/rotate the key
+      // without a dedicated Cloud Function. Symmetric with the read rule.
       match /secrets/{secretId} {
-        allow read: if isBusinessOwner(businessId);
-        allow write: if false; // Cloud Functions (admin SDK) only
+        allow read, write: if isBusinessOwner(businessId);
       }
 
       // Staff subcollection

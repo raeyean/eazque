@@ -45,7 +45,11 @@ vi.mock("firebase-admin/firestore", () => ({
 }));
 
 vi.mock("firebase-functions/logger", () => ({
-  logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+  log: vi.fn(),
 }));
 
 // Import AFTER mocks are set up

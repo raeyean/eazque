@@ -24,7 +24,7 @@ export default function App() {
         {/* Customer routes */}
         <Route path="/q/:businessId" element={<JoinQueuePage />} />
         <Route
-          path="/q/:businessId/status/:sessionToken"
+          path="/q/:businessId/status/:entryId/:sessionToken"
           element={<QueueStatusPage />}
         />
         <Route path="/display/:businessId" element={<DisplayPage />} />

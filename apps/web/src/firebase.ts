@@ -1,4 +1,5 @@
 import { initializeApp } from "firebase/app";
+import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
@@ -14,6 +15,20 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+
+// App Check — attach a reCAPTCHA v3 token to every Firebase request so the
+// backend can distinguish traffic from a real browser session vs. arbitrary
+// callers. Gate on env so dev builds without a site key still work; flip
+// enforceAppCheck on the public callables once volume looks healthy in the
+// Firebase Console → App Check metrics tab.
+const appCheckSiteKey = import.meta.env.VITE_APPCHECK_RECAPTCHA_KEY;
+if (appCheckSiteKey) {
+  initializeAppCheck(app, {
+    provider: new ReCaptchaV3Provider(appCheckSiteKey),
+    isTokenAutoRefreshEnabled: true,
+  });
+}
+
 export const db = getFirestore(app, import.meta.env.VITE_FIRESTORE_DATABASE_ID || "(default)");
 export const functions = getFunctions(app);
 export const auth = getAuth(app);

@@ -1,7 +1,7 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { FieldValue } from "firebase-admin/firestore";
 import crypto from "crypto";
-import { logger } from "firebase-functions/logger";
+import * as logger from "firebase-functions/logger";
 import { joinQueueRequestSchema, estimateWaitMinutes } from "@eazque/shared";
 import { db } from "./config";
 import { paths } from "./paths";
@@ -60,7 +60,11 @@ export const onCustomerJoin = onCall({ cors: true, invoker: "public" }, async (r
       joinedAt: FieldValue.serverTimestamp(),
     });
 
-    // Mirror public fields to publicEntries (no PII)
+    // Mirror public fields to publicEntries (no PII, no secrets).
+    // sessionToken intentionally omitted — publicEntries is world-readable, and
+    // storing the token here would let anyone harvest tokens and call
+    // customerRemoveSelf on victim entries. The token lives only in the
+    // staff-only `entries` doc, and customers receive it via the join response.
     const publicEntryRef = db.doc(
       paths.publicEntry(businessId, queueId, entryRef.id)
     );
@@ -68,7 +72,6 @@ export const onCustomerJoin = onCall({ cors: true, invoker: "public" }, async (r
       queueNumber: nextNumber,
       displayNumber: entryData.displayNumber,
       status: "waiting",
-      sessionToken,
     });
 
     transaction.update(queueRef, { nextNumber: nextNumber + 1 });

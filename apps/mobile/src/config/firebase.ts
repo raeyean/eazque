@@ -28,6 +28,13 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
+// TODO: App Check on React Native requires @react-native-firebase/app-check
+// (Play Integrity on Android, DeviceCheck/AppAttest on iOS) which needs
+// either a config plugin or a bare workflow — not compatible with Expo Go.
+// The web client (apps/web) has reCAPTCHA v3 App Check wired up; once we
+// move mobile to a dev client / EAS build, mirror it here and flip
+// enforceAppCheck on the public callables.
+
 export const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(AsyncStorage),
 });

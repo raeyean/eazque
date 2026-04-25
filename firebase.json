@@ -10,6 +10,9 @@
       "indexes": "firebase/firestore.indexes.json"
     }
   ],
+  "storage": {
+    "rules": "firebase/storage.rules"
+  },
   "hosting": {
     "public": "apps/web/dist",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],

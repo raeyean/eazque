@@ -1,7 +1,7 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { getAuth } from "firebase-admin/auth";
 import { FieldValue } from "firebase-admin/firestore";
-import { logger } from "firebase-functions/logger";
+import * as logger from "firebase-functions/logger";
 import { db } from "./config";
 import { paths } from "./paths";
 import {

@@ -1,11 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  collection,
-  query,
-  where,
-  limit,
-  onSnapshot,
-} from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
 
 export interface MyEntryData {
@@ -18,37 +12,37 @@ export interface MyEntryData {
 export function useMyEntry(
   businessId: string,
   queueId: string | null,
-  sessionToken: string
+  entryId: string
 ) {
   const [entry, setEntry] = useState<MyEntryData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!queueId) {
+    if (!queueId || !entryId) {
       setLoading(false);
       return;
     }
 
-    const q = query(
-      collection(db, `businesses/${businessId}/queues/${queueId}/publicEntries`),
-      where("sessionToken", "==", sessionToken),
-      limit(1)
+    const ref = doc(
+      db,
+      `businesses/${businessId}/queues/${queueId}/publicEntries/${entryId}`
     );
-    const unsub = onSnapshot(q, (snap) => {
-      if (!snap.empty) {
-        const d = snap.docs[0];
-        const data = d.data();
+    const unsub = onSnapshot(ref, (snap) => {
+      if (snap.exists()) {
+        const data = snap.data();
         setEntry({
-          id: d.id,
+          id: snap.id,
           queueNumber: data.queueNumber,
           displayNumber: data.displayNumber,
           status: data.status,
         });
+      } else {
+        setEntry(null);
       }
       setLoading(false);
     });
     return unsub;
-  }, [businessId, queueId, sessionToken]);
+  }, [businessId, queueId, entryId]);
 
   return { entry, loading };
 }

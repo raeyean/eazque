@@ -23,15 +23,16 @@ interface NavigationState {
 
 interface QueueContentProps {
   businessId: string;
+  entryId: string;
   sessionToken: string;
   navState: NavigationState;
   business: ReturnType<typeof useBusinessData>["business"];
   bizLoading: boolean;
 }
 
-function QueueContent({ businessId, sessionToken, navState, business, bizLoading }: QueueContentProps) {
+function QueueContent({ businessId, entryId, sessionToken, navState, business, bizLoading }: QueueContentProps) {
   const { queue, queueId, loading: queueLoading } = useActiveQueue(businessId);
-  const { entry, loading: entryLoading } = useMyEntry(businessId, queueId, sessionToken);
+  const { entry, loading: entryLoading } = useMyEntry(businessId, queueId, entryId);
   const { entries } = useQueueEntries(businessId, queueId);
   const [confirming, setConfirming] = useState(false);
   const [leaving, setLeaving] = useState(false);
@@ -60,7 +61,7 @@ function QueueContent({ businessId, sessionToken, navState, business, bizLoading
     setLeaveError(null);
     try {
       const removeSelf = httpsCallable(functions, "customerRemoveSelf");
-      await removeSelf({ businessId, queueId, sessionToken });
+      await removeSelf({ businessId, queueId, entryId, sessionToken });
     } catch {
       setLeaveError("Could not leave the queue. Please try again.");
     } finally {
@@ -126,8 +127,9 @@ function QueueContent({ businessId, sessionToken, navState, business, bizLoading
 }
 
 export default function QueueStatusPage() {
-  const { businessId, sessionToken } = useParams<{
+  const { businessId, entryId, sessionToken } = useParams<{
     businessId: string;
+    entryId: string;
     sessionToken: string;
   }>();
   const location = useLocation();
@@ -156,6 +158,7 @@ export default function QueueStatusPage() {
       <QueueContent
         key={refreshKey}
         businessId={businessId!}
+        entryId={entryId!}
         sessionToken={sessionToken!}
         navState={navState}
         business={business}

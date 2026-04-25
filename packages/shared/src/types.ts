@@ -35,6 +35,7 @@ export interface BusinessPublic {
   primaryColor: string;
   whatsappNumber: string;
   formFields: FormField[];
+  defaultEstimatedTimePerCustomer?: number;
 }
 
 export interface Staff {
@@ -91,13 +92,12 @@ export interface QueueEntryPublic {
   status: EntryStatus;
 }
 
-/** Mirror document in publicEntries subcollection — no PII, readable by anyone */
+/** Mirror document in publicEntries subcollection — no PII, no secrets, readable by anyone */
 export interface PublicEntry {
   id: string;
   queueNumber: number;
   displayNumber: string;
   status: EntryStatus;
-  sessionToken: string;
 }
 
 /** Response from onCustomerJoin callable */
