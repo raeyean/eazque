@@ -47,3 +47,9 @@ yarn-error.*
 
 # Firebase
 firebase/functions/lib/
+.firebase/
+
+# Local tooling (Claude Code, agent skills)
+.claude/
+.agents/
+skills-lock.json
