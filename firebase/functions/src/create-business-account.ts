@@ -109,7 +109,11 @@ export async function createBusinessAccountHandler(
   }
 }
 
-// Public endpoint — App Check / rate-limiting to be added before production scale
+// Public endpoint. App Check enforcement is intentionally NOT enabled here:
+// the mobile owner-signup flow calls this callable, and the mobile app does
+// not yet emit App Check tokens (RN provider blocked on EAS dev client —
+// see apps/mobile/src/config/firebase.ts). Flip enforceAppCheck on once
+// mobile is wired.
 export const createBusinessAccount = onCall(
   { cors: true, invoker: "public" },
   async (request) => {
